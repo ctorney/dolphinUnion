@@ -31,6 +31,9 @@ df = pd.read_csv(FILELIST)
 
 for index, row in df.iterrows():
    
+    if index<5:
+        continue
+
     # pandas file for export of positions
     dfPos = pd.DataFrame(columns= ['x', 'y', 'frame'])    
     
@@ -44,7 +47,7 @@ for index, row in df.iterrows():
 
     noext, ext = os.path.splitext(row.filename)
     tlogName = DATADIR + 'logs/LOG_' + noext + '.csv'
-    posfilename = DATADIR + 'tracked/TRACKS_' + noext + '.csv'
+    posfilename = DATADIR + 'tracked/POSITIONS_' + str(index) + '_' + noext + '.csv'
     
     print('Movie ' +  tlogName + ' from ' + str(timeStart) + ' to ' + str(timeStop))
     cap = cv2.VideoCapture(inputName)

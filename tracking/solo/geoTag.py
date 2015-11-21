@@ -8,8 +8,8 @@ import re
 import time
 import datetime
 from scipy import interpolate
-HD = os.getenv('HOME')
 
+HD = os.getenv('HOME')
 
 #DATADIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
 DATADIR = HD + '/Dropbox/dolphin_union/2015_footage/Solo/'
