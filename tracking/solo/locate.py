@@ -9,8 +9,8 @@ import time
 HD = os.getenv('HOME')
 
 
-DATADIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
-#DATADIR = HD + '/data/dolphinUnion/solo/'
+#DATADIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
+DATADIR = HD + '/Dropbox/dolphin_union/2015_footage/Solo/'
 FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
 
 params = cv2.SimpleBlobDetector_Params()
@@ -30,9 +30,7 @@ blobdetector = cv2.SimpleBlobDetector_create(params)
 df = pd.read_csv(FILELIST)
 
 for index, row in df.iterrows():
-    if index!=4:
-        continue
-
+   
     # pandas file for export of positions
     dfPos = pd.DataFrame(columns= ['x', 'y', 'frame'])    
     
@@ -41,12 +39,12 @@ for index, row in df.iterrows():
     h,m,s = re.split(':',row.stop)
     timeStop = int(h)*3600+int(m)*60+int(s)
 
-    inputName = DATADIR + '/' + row.filename
+    inputName = DATADIR + 'footage/' + row.filename
     
 
     noext, ext = os.path.splitext(row.filename)
-    tlogName = DATADIR + '/LOG_' + noext + '.csv'
-    posfilename = DATADIR + '/TRACKS_' + noext + '.csv'
+    tlogName = DATADIR + 'logs/LOG_' + noext + '.csv'
+    posfilename = DATADIR + 'tracked/TRACKS_' + noext + '.csv'
     
     print('Movie ' +  tlogName + ' from ' + str(timeStart) + ' to ' + str(timeStop))
     cap = cv2.VideoCapture(inputName)
@@ -55,16 +53,20 @@ for index, row in df.iterrows():
     fStart = timeStart*fps
     fStop = timeStop*fps
     
-    fStop = fStart + 60*20
+    
     cap.set(cv2.CAP_PROP_POS_FRAMES,fStart)
     S = (1920,1080)
-    out = cv2.VideoWriter('tmp.avi', cv2.VideoWriter_fourcc('M','J','P','G'), cap.get(cv2.CAP_PROP_FPS)/4, S, True)
+    
     for tt in range(fStop-fStart):
-        print(tt,fStop)
+        
+        print(tt,fStop-fStart)
         # Capture frame-by-frame
         _, frame = cap.read()
         if frame is None:
             break
+        # movies are 60 fps so cut down to 4 fps
+        if (tt%15)!=0:
+            continue
         cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blobs= blobdetector.detect(cv2image)
         # draw detected objects and display
@@ -73,17 +75,18 @@ for index, row in df.iterrows():
         ind = 0
         for b in blobs:
             ind +=1
-            cv2.rectangle(frame, ((int(b.pt[0])-sz, int(b.pt[1])-sz)),((int(b.pt[0])+sz, int(b.pt[1])+sz)),(0,0,0),2)
+#            cv2.rectangle(frame, ((int(b.pt[0])-sz, int(b.pt[1])-sz)),((int(b.pt[0])+sz, int(b.pt[1])+sz)),(0,0,0),2)
             thisFrame.set_value(ind, 'x', b.pt[0])
             thisFrame.set_value(ind, 'y', b.pt[1])
-            thisFrame.set_value(ind, 'frame', tt)
+            thisFrame.set_value(ind, 'frame', tt+fStart)
         dfPos = pd.concat([dfPos,thisFrame])
-        if (tt%4)==0:
-            out.write(frame)
+        
+        ## output
+        #out.write(frame)
         
 
     cap.release()
-    out.release()
+    #out.release()
 
-#dfPos.to_csv(posfilename)
+    dfPos.to_csv(posfilename)
 

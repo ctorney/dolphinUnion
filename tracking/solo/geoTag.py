@@ -18,8 +18,8 @@ FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
 df = pd.read_csv(FILELIST)
 
 for index, row in df.iterrows():
-    if index!=4:
-        continue
+    #if index!=4:
+    #    continue
 
     noext, ext = os.path.splitext(row.filename)   
     
