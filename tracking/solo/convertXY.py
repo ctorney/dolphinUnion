@@ -32,7 +32,9 @@ HD = os.getenv('HOME')
 DATADIR = HD + '/Dropbox/dolphin_union/2015_footage/Solo/'
 LOGDIR = DATADIR + '/logs/'
 FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
-MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
+# DROPBOX OR HARDDRIVE
+MOVIEDIR = DATADIR + 'footage/' 
+#MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
 
 df = pd.read_csv(FILELIST)
 
@@ -70,7 +72,8 @@ for index, row in df.iterrows():
     fStop = timeStop*fps
     #fStart = timeStart*fps
     #fStop = timeStop*fps
-    fStop = fStart+7200
+    #fStart = 4680
+    #fStop = 4920#+26*60#fStart+3600
     
     cap.set(cv2.CAP_PROP_POS_FRAMES,fStart)
     S = (1920,1080)
@@ -85,13 +88,14 @@ for index, row in df.iterrows():
     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations,  termination_eps)
 
     
-    
-    allTransforms = np.zeros((fStop-fStart,3))
+    full_warp = np.eye(3, 3, dtype=np.float32)
+    allTransforms = np.zeros((fStop-fStart,2,3))
     #fStart=4380
     #cap.set(cv2.CAP_PROP_POS_FRAMES,fStart)
     im1_gray = np.array([])
     lf = max(posDF['frame'])
     warp_matrix = np.eye(2, 3, dtype=np.float32) 
+    #out = cv2.VideoWriter('tmp2.avi', cv2.VideoWriter_fourcc('M','J','P','G'), cap.get(cv2.CAP_PROP_FPS)/6, S, True)
     for tt in range(fStart,fStop):
 
         _, frame = cap.read()
@@ -106,19 +110,21 @@ for index, row in df.iterrows():
         im2_gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
         
                      
-        #(cc, warp_matrix) = cv2.findTransformECC(im2_gray,im1_gray,warp_matrix, warp_mode, criteria)    
-        warp_matrix = cv2.estimateRigidTransform(im2_gray, im1_gray, False)
-        print(tt,fStop)#,cc)
-        allTransforms[tt-fStart,0]=math.atan2(warp_matrix[1,0],warp_matrix[0,0])
-        allTransforms[tt-fStart,1]=warp_matrix[0,2]
-        allTransforms[tt-fStart,2]=warp_matrix[1,2]
-        #full_warp = np.dot(np.vstack((warp_matrix,[0,0,1])),full_warp)
-
-        im2_aligned = cv2.warpAffine(frame, warp_matrix[0:2,:], (1920,1080), flags=cv2.INTER_LINEAR)# + cv2.WARP_INVERSE_MAP)   
-        cv2.imwrite('frames/f-' + str(tt) + '.png',cv2.addWeighted(im2_aligned,0.7, cv2.cvtColor(im1_gray,cv2.COLOR_GRAY2BGR) ,0.3,0) )
-        
+        (cc, warp_matrix) = cv2.findTransformECC(im2_gray,im1_gray,warp_matrix, warp_mode, criteria)    
+        #warp_matrix = cv2.estimateRigidTransform(im2_gray, im1_gray, False)
+        allTransforms[tt-fStart,:]=warp_matrix
+        print(tt,fStop,cc)
+        #allTransforms[tt-fStart,0]=math.atan2(warp_matrix[1,0],warp_matrix[0,0])
+        #allTransforms[tt-fStart,1]=warp_matrix[0,2]
+        #allTransforms[tt-fStart,2]=warp_matrix[1,2]
+        full_warp = np.dot(full_warp,np.vstack((warp_matrix,[0,0,1])))
+        print(full_warp)
+        #im2_aligned = cv2.warpAffine(frame, full_warp[0:2,:], (1920,1080), flags=cv2.INTER_LINEAR)# + cv2.WARP_INVERSE_MAP)   
+        #cv2.imwrite('frames/f-' + str(tt) + '.png',cv2.addWeighted(im2_aligned,0.7, cv2.cvtColor(im1_gray,cv2.COLOR_GRAY2BGR) ,0.3,0) )
+        #cv2.imwrite('frames/f-' + str(tt) + '.png',im2_aligned)
+        #cv2.imwrite('frames/pf-' + str(tt) + '.png',frame)
         im1_gray =im2_gray.copy()
-        
+        #out.write(frame)
         #for ind,posrow in dfFrame.iterrows():
         #    xx0=posrow['x_px']
         #    yy0=posrow['y_px']
@@ -135,8 +141,13 @@ for index, row in df.iterrows():
          #   posDF.set_value(ind,'y',my)
     
     #break
+    #out.release()
     full_warp = np.eye(3, 3, dtype=np.float32)
     for fnum, dfFrame in posDF.groupby('frame'):
+        if fnum>=9930:
+            break
+        if fnum<fStart:
+            continue
 #        if fnum%10>0:
 #            continue
 #        if fnum<3660:
@@ -159,31 +170,35 @@ for index, row in df.iterrows():
 #        cv2.imwrite('frames/f-' + str(fnum) + '.png',im2_aligned)
 #        
 #        im1_gray =im2_gray.copy()
-        
+        warp_matrix  =allTransforms[fnum-fStart,:]
+            #dth = np.sum(allTransforms[0:fnum-fStart,0])
+            #dx = np.sum(allTransforms[0:fnum-fStart,1])
+            #dy = np.sum(allTransforms[0:fnum-fStart,2])
+        #full_warp = np.dot(np.vstack((warp_matrix,[0,0,1])),full_warp)
+        full_warp = np.dot(full_warp,np.vstack((warp_matrix,[0,0,1])))
+        print(full_warp)
         for ind,posrow in dfFrame.iterrows():
+            
             xx0=posrow['x_px']
             yy0=posrow['y_px']
-            dth = np.sum(allTransforms[0:fnum-fStart,0])
-            dx = np.sum(allTransforms[0:fnum-fStart,1])
-            dy = np.sum(allTransforms[0:fnum-fStart,2])
-            
-            full_warp[0,0]=math.cos(dth)
-            full_warp[0,1]=math.sin(dth)
-            full_warp[1,0]=-math.sin(dth)
-            full_warp[1,1]=math.cos(dth)
-            full_warp[0,2]=-dx
-            full_warp[1,2]=-dy
+            #full_warp[0,0]=math.cos(dth)
+            #full_warp[0,1]=math.sin(dth)
+            #full_warp[1,0]=-math.sin(dth)
+            #full_warp[1,1]=math.cos(dth)
+            #full_warp[0,2]=-dx
+            #full_warp[1,2]=-dy
             
             cx = 960 
             cy = 540
     
             # distance of caibou to centre of frame in metres
-            xpre = (xx0-cx)
-            ypre = (yy0-cy)
-    
+            xpre = (xx0)
+            ypre = yy0
+            
     # rotate due to heading of UAV    
     #xreal =cx + xmetres*math.cos(hdg) -  ymetres*math.sin(hdg)
     #yreal = 1080- (cy + ymetres*math.cos(hdg) +  xmetres*math.sin(hdg))
+            wmi = cv2.invertAffineTransform(full_warp[0:2,:])
             [mx,my,_] = np.dot(full_warp, np.array([[xpre],[ypre],[1]]))
             #if fnum==3996:
             #    print(xx0,yy0,mx,my)
@@ -192,8 +207,8 @@ for index, row in df.iterrows():
             #    my=-camy
             #    first=0
                 
-            posDF.set_value(ind,'x',cx+mx)
-            posDF.set_value(ind,'y',cy+my)
+            posDF.set_value(ind,'x',mx)
+            posDF.set_value(ind,'y',my)
         
           
 
