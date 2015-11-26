@@ -17,6 +17,8 @@ FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
 df = pd.read_csv(FILELIST)
 
 for index, row in df.iterrows():
+    if index!=2:
+        continue
 
     noext, ext = os.path.splitext(row.filename)   
     
@@ -32,9 +34,9 @@ for index, row in df.iterrows():
 
 
     f_iter = (frame for fnum, frame in toLink.groupby('frame'))
-    t = pd.concat(pred.link_df_iter(f_iter, 10.5, memory=2))
+    t = pd.concat(pred.link_df_iter(f_iter, 5.0, memory=20))
 
 
-    t1 = tp.filtering.filter_stubs(t,2)
+ #   t1 = tp.filtering.filter_stubs(t,2)
 
-    t1.to_csv(trackName)
+    t.to_csv(trackName)

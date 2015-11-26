@@ -38,7 +38,7 @@ for imName in lst1:
 
 #clf = svm.SVC()
 
-clf = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1),algorithm="SAMME",n_estimators=50)
+clf = AdaBoostClassifier(DecisionTreeClassifier(max_depth=12),algorithm="SAMME",n_estimators=50)
 y_pred = clf.fit(trainData,targetData)
 pickle.dump(clf, open( "../svmClassifier.p","wb"))
 y_pred = clf.predict(trainData)

@@ -9,21 +9,37 @@ import time
 HD = os.getenv('HOME')
 
 
-#DATADIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
 DATADIR = HD + '/Dropbox/dolphin_union/2015_footage/Solo/'
 FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
 
+# DROPBOX OR HARDDRIVE
+#MOVIEDIR = DATADIR + 'footage/' 
+MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
+
 params = cv2.SimpleBlobDetector_Params()
-params.maxThreshold= 120
-params.minThreshold= 10
+
+params.maxThreshold= 110 
+params.minThreshold= 50
 params.thresholdStep= 5
-params.minDistBetweenBlobs= 1
 params.filterByArea= 1
-params.maxArea= 500
-params.minArea= 15
+params.maxArea= 500 
+params.minArea= 3
 params.filterByCircularity= 0
+params.maxCircularity= 1
+params.minCircularity= 0
 params.filterByInertia= 0
 params.filterByConvexity= 0
+
+#params.maxThreshold= 120
+#params.minThreshold= 10
+#params.thresholdStep= 5
+#params.minDistBetweenBlobs= 1
+#params.filterByArea= 1
+#params.maxArea= 500
+#params.minArea= 15
+#params.filterByCircularity= 0
+#params.filterByInertia= 0
+#params.filterByConvexity= 0
 
 blobdetector = cv2.SimpleBlobDetector_create(params)
 
@@ -31,9 +47,8 @@ df = pd.read_csv(FILELIST)
 
 for index, row in df.iterrows():
    
-    if index<5:
+    if index<2:
         continue
-
     # pandas file for export of positions
     dfPos = pd.DataFrame(columns= ['x', 'y', 'frame'])    
     
@@ -42,7 +57,7 @@ for index, row in df.iterrows():
     h,m,s = re.split(':',row.stop)
     timeStop = int(h)*3600+int(m)*60+int(s)
 
-    inputName = DATADIR + 'footage/' + row.filename
+    inputName = MOVIEDIR + row.filename
     
 
     noext, ext = os.path.splitext(row.filename)
