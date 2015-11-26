@@ -6,35 +6,68 @@ import os,sys
 import math as m
 import pandas as pd
 
+HD = os.getenv('HOME')
 
-def createYesNoSamples(filename):
-    #filename='../../test.avi'
-    path, fileonly = os.path.split(filename)
+MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
+DATADIR = HD + '/Dropbox/dolphin_union/2015_footage/Solo/'
+TRACKDIR = DATADIR + '/tracked/'
+LOGDIR = DATADIR + '/logs/'
+FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
+
+df = pd.read_csv(FILELIST)
+
+for index, row in df.iterrows():
+
+    if index!=2:
+        continue
+    
+    noext, ext = os.path.splitext(row.filename)   
+
+
+    trackName = TRACKDIR + '/TRACKS_' + str(index) + '_' + noext + '.csv'
+    geoName = LOGDIR + '/GEOTAG_' + noext + '.csv'
+    movieName = MOVIEDIR + row.filename
+    
+
+        
+
+    # name the images after the track file name
+    path, fileonly = os.path.split(trackName)
     noext, ext = os.path.splitext(fileonly)
     
     
-    linkedDF = pd.read_csv('../../link/output.csv') 
+    linkedDF = pd.read_csv(trackName) 
+    geoDF = pd.read_csv(geoName) 
     nx = 1920
     ny = 1080
     
     numPars = int(linkedDF['particle'].max()+1)
     
-    
+    caribouYN = np.zeros(shape=(0,2),dtype=int)
     box_dim = 128    
-    cap = cv2.VideoCapture(filename)
-       
+    cap = cv2.VideoCapture(movieName)
+    
     sz=16
-    frName = ' is wildebeest? y or n'
+    frName = ' is caribou? y or n'
     cv2.destroyAllWindows()
     cv2.namedWindow(frName, flags =  cv2.WINDOW_NORMAL)
+    escaped = False
     for i in range(numPars):
         thisPar = linkedDF[linkedDF['particle']==i]
+        if escaped == True:
+            break
+        if thisPar.count()[0]<10:
+            print(thisPar.count()[0])
+            continue
         
+#        print(thisPar.count()[0])
         for _, row in thisPar.iterrows():
     
             ix = int(row['x'])
             iy = int(row['y'])
             fNum = int(row['frame'])
+            
+
             
             cap.set(cv2.CAP_PROP_POS_FRAMES,fNum)
             _, frame = cap.read()
@@ -47,42 +80,47 @@ def createYesNoSamples(filename):
             k = cv2.waitKey(1000)
             
             if k==ord('y'):
-                for _, row2 in thisPar.iterrows():
-                    ix = int(row2['x'])
-                    iy = int(row2['y'])
-                    fNum = int(row2['frame'])
-                    
-                    cap.set(cv2.CAP_PROP_POS_FRAMES,fNum)
-                    _, frame = cap.read()
-            
-                    tmpImg =  cv2.cvtColor(frame[max(0,iy-sz):min(ny,iy+sz), max(0,ix-sz):min(nx,ix+sz)].copy(), cv2.COLOR_BGR2GRAY)
-                    if tmpImg.size == 4*sz*sz and tmpImg[tmpImg==0].size<10 :
-                        cv2.imwrite('./yes/' + noext + '_' + str(i) + '_' + str(fNum) + '.png',tmpImg)
+                caribouYN = np.vstack((caribouYN, [i,1]))
                 break
             if k==ord('n'):
-                for _, row2 in thisPar.iterrows():
-                    ix = int(row2['x'])
-                    iy = int(row2['y'])
-                    fNum = int(row2['frame'])
-                    
-                    cap.set(cv2.CAP_PROP_POS_FRAMES,fNum)
-                    _, frame = cap.read()
-            
-                    tmpImg =  cv2.cvtColor(frame[max(0,iy-sz):min(ny,iy+sz), max(0,ix-sz):min(nx,ix+sz)].copy(), cv2.COLOR_BGR2GRAY)
-                    if tmpImg.size == 4*sz*sz and tmpImg[tmpImg==0].size<10 :
-                        cv2.imwrite('./no/' + noext + '_' + str(i) + '_' + str(fNum) + '.png',tmpImg)
+                caribouYN = np.vstack((caribouYN, [i,0]))
                 break
             if k==27:    # Esc key to stop
-                cv2.destroyAllWindows()
-                cap.release()
-                return
-    
+                escaped=True
+                break 
+            
     cv2.destroyAllWindows()
+    for caribou in caribouYN:
+        thisPar = linkedDF[linkedDF['particle']==caribou[0]]
+    
+        for index2, row2 in thisPar.iterrows():
+            if (index2%5)==0:
+                continue
+            ix = int(row2['x'])
+            iy = int(row2['y'])
+            fNum = int(row2['frame'])
+            
+            
+            cap.set(cv2.CAP_PROP_POS_FRAMES,fNum)
+            _, frame = cap.read()
+    
+            # get altitude of frame
+            alt = float(geoDF['alt'][fNum])/1000.0            
+            # work out size of box if box if 32x32 at 100m
+            grabSize = m.ceil((100.0/alt)*16.0)
+            tmpImg =  cv2.cvtColor(frame[max(0,iy-grabSize):min(ny,iy+grabSize), max(0,ix-grabSize):min(nx,ix+grabSize)].copy(), cv2.COLOR_BGR2GRAY)
+
+            
+            if tmpImg.size == 4*grabSize*grabSize:# and tmpImg[tmpImg==0].size<10 :
+                if caribou[1]==1:
+                    cv2.imwrite('./yes/' + noext + '_' + str(caribou[0]) + '_' + str(fNum) + '.png',cv2.resize(tmpImg,(32,32)))
+                if caribou[1]==0:
+                    cv2.imwrite('./no/' + noext + '_' + str(caribou[0]) + '_' + str(fNum) + '.png',cv2.resize(tmpImg,(32,32)))
+                    break
+            
+    
+    
     cap.release()
 
-if __name__ == '__main__':
-    #FULLNAME = sys.argv[1]
-    FULLNAME = '/home/ctorney/data/wildebeest/test.avi'
 
-    createYesNoSamples(FULLNAME)
 
