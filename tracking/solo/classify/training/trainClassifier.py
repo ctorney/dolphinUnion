@@ -14,8 +14,8 @@ sys.path.append('../.')
 from circularHOGExtractor import circularHOGExtractor
 ch = circularHOGExtractor(4,2,4) 
 
-cls0 = './no/'
-cls1 = './yes/'
+cls0 = './no2/'
+cls1 = './yes2/'
 
 lst0 = [name for name in os.listdir(cls0) if not name.startswith('.')] 
 lst1 = [name for name in os.listdir(cls1) if not name.startswith('.')]
@@ -40,6 +40,6 @@ for imName in lst1:
 
 clf = AdaBoostClassifier(DecisionTreeClassifier(max_depth=12),algorithm="SAMME",n_estimators=50)
 y_pred = clf.fit(trainData,targetData)
-pickle.dump(clf, open( "../svmClassifier.p","wb"))
+pickle.dump(clf, open( "../svmClassifier2.p","wb"))
 y_pred = clf.predict(trainData)
 print("Number of mislabeled points out of a total %d points : %d" % (trainData.shape[0],(targetData != y_pred).sum()))

@@ -18,13 +18,13 @@ df = pd.read_csv(FILELIST)
 
 for index, row in df.iterrows():
 
-    if index!=2:
+    if index!=3:
         continue
     
     noext, ext = os.path.splitext(row.filename)   
 
 
-    trackName = TRACKDIR + '/TRACKS_' + str(index) + '_' + noext + '.csv'
+    trackName = TRACKDIR + '/FINAL_' + str(index) + '_' + noext + '.csv'
     geoName = LOGDIR + '/GEOTAG_' + noext + '.csv'
     movieName = MOVIEDIR + row.filename
     
@@ -41,7 +41,7 @@ for index, row in df.iterrows():
     nx = 1920
     ny = 1080
     
-    numPars = int(linkedDF['particle'].max()+1)
+    numPars = int(linkedDF['c_id'].max()+1)
     
     caribouYN = np.zeros(shape=(0,2),dtype=int)
     box_dim = 128    
@@ -53,18 +53,23 @@ for index, row in df.iterrows():
     cv2.namedWindow(frName, flags =  cv2.WINDOW_NORMAL)
     escaped = False
     for i in range(numPars):
-        thisPar = linkedDF[linkedDF['particle']==i]
+        if i<000:
+            continue
+        sys.stdout.write('\r')
+        sys.stdout.write("caribou id : %d" % (i))
+        sys.stdout.flush()
+        #print('caribou id: ' + str(i))
+        thisPar = linkedDF[linkedDF['c_id']==i]
         if escaped == True:
             break
         if thisPar.count()[0]<10:
-            print(thisPar.count()[0])
             continue
         
 #        print(thisPar.count()[0])
         for _, row in thisPar.iterrows():
     
-            ix = int(row['x'])
-            iy = int(row['y'])
+            ix = int(row['x_px'])
+            iy = int(row['y_px'])
             fNum = int(row['frame'])
             
 
@@ -73,7 +78,7 @@ for index, row in df.iterrows():
             _, frame = cap.read()
             
             
-            cv2.rectangle(frame, ((int( row['x'])-sz, int( row['y'])-sz)),((int( row['x'])+sz, int( row['y'])+sz)),(0,0,0),1)
+            cv2.rectangle(frame, ((int( row['x_px'])-sz, int( row['y_px'])-sz)),((int( row['x_px'])+sz, int( row['y_px'])+sz)),(0,0,0),1)
             tmpImg = frame[max(0,iy-box_dim/2):min(ny,iy+box_dim/2), max(0,ix-box_dim/2):min(nx,ix+box_dim/2)]
             
             cv2.imshow(frName,tmpImg)
@@ -85,21 +90,23 @@ for index, row in df.iterrows():
             if k==ord('n'):
                 caribouYN = np.vstack((caribouYN, [i,0]))
                 break
+            if k==ord('c'):
+                break
             if k==27:    # Esc key to stop
                 escaped=True
                 break 
             
     cv2.destroyAllWindows()
     for caribou in caribouYN:
-        thisPar = linkedDF[linkedDF['particle']==caribou[0]]
+        thisPar = linkedDF[linkedDF['c_id']==caribou[0]]
     
         for index2, row2 in thisPar.iterrows():
-            if (index2%5)==0:
-                continue
-            ix = int(row2['x'])
-            iy = int(row2['y'])
-            fNum = int(row2['frame'])
             
+            ix = int(row2['x_px'])
+            iy = int(row2['y_px'])
+            fNum = int(row2['frame'])
+            if (fNum%5)!=0:
+                continue
             
             cap.set(cv2.CAP_PROP_POS_FRAMES,fNum)
             _, frame = cap.read()
@@ -113,10 +120,10 @@ for index, row in df.iterrows():
             
             if tmpImg.size == 4*grabSize*grabSize:# and tmpImg[tmpImg==0].size<10 :
                 if caribou[1]==1:
-                    cv2.imwrite('./yes/' + noext + '_' + str(caribou[0]) + '_' + str(fNum) + '.png',cv2.resize(tmpImg,(32,32)))
+                    cv2.imwrite('./yes2/' + noext + '_' + str(caribou[0]) + '_' + str(fNum) + '.png',cv2.resize(tmpImg,(32,32)))
                 if caribou[1]==0:
-                    cv2.imwrite('./no/' + noext + '_' + str(caribou[0]) + '_' + str(fNum) + '.png',cv2.resize(tmpImg,(32,32)))
-                    break
+                    cv2.imwrite('./no2/' + noext + '_' + str(caribou[0]) + '_' + str(fNum) + '.png',cv2.resize(tmpImg,(32,32)))
+                    #break
             
     
     

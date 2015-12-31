@@ -15,13 +15,13 @@ LOGDIR = DATADIR + '/logs/'
 FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
 
 # DROPBOX OR HARDDRIVE
-MOVIEDIR = DATADIR + 'footage/' 
-#MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
+#MOVIEDIR = DATADIR + 'footage/' 
+MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
 
 df = pd.read_csv(FILELIST)
 for index, row in df.iterrows():
-    #if index!=0:
-    #    continue
+    if index!=3:
+        continue
     noext, ext = os.path.splitext(row.filename)   
     posfilename = DATADIR + 'tracked/CARIBOU_POS_' + str(index) + '_' + noext + '.csv'
     posfilenameOUT = DATADIR + 'tracked/CARIBOU_REAL_POS_' + str(index) + '_' + noext + '.csv'

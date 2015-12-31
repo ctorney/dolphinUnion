@@ -22,7 +22,7 @@ sys.path.append('./classify/.')
 from circularHOGExtractor import circularHOGExtractor
 ch = circularHOGExtractor(4,2,4) 
 
-fhgClass = pickle.load( open( "./classify/svmClassifier.p", "rb" ) )
+fhgClass = pickle.load( open( "./classify/svmClassifier2.p", "rb" ) )
 
 def checkIsCaribou(x,y,frame,alt):
     nx = 1920
@@ -52,6 +52,7 @@ FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
 # DROPBOX OR HARDDRIVE
 #MOVIEDIR = DATADIR + 'footage/' 
 MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
+MOVIEDIR = HD + '/workspace/dolphinUnion/tracking/solo/'
 
 params = cv2.SimpleBlobDetector_Params()
 
@@ -74,7 +75,7 @@ outputMovie=0
 
 for index, row in df.iterrows():
    
-    if index!=0:
+    if index!=3:
         continue
     # pandas file for export of positions
     dfPos = pd.DataFrame(columns= ['x', 'y', 'frame'])    
