@@ -31,19 +31,26 @@ for index, row in df.iterrows():
     nx = math.ceil(xrange/32)
     ny = math.ceil(yrange/32)
     grid = np.zeros((nx,ny,2))
+    gridPos = np.zeros((nx,ny,2))
     xdirs = np.cos(posDF['heading'].values)
     ydirs = np.sin(posDF['heading'].values)
-    kappa = 32*32*250
+    xp = posDF['x'].values
+    yp = posDF['y'].values
+    kappa = 32*32
     for i in range(nx):
         for j in range(ny):
             gx = i * 32
             gy = j * 32
             dists = ((posDF['x'].values - gx)**2 + (posDF['y'].values - gy)**2)
             weights = np.exp(-dists/kappa)
+            gridPos[i,j,0]=gx
+            gridPos[i,j,1]=gy
             grid[i,j,0]=np.sum(weights*xdirs)/np.sum(weights)
             grid[i,j,1]=np.sum(weights*ydirs)/np.sum(weights)
 
-    plt.quiver(grid[:,:,0],grid[:,:,1])
+    plt.quiver(xp,yp,xdirs,ydirs,angles='xy', scale_units='xy', color='r', scale=1.0/32.0)
+    plt.quiver(gridPos[:,:,0],gridPos[:,:,1],grid[:,:,0],grid[:,:,1],angles='xy', scale_units='xy', scale=1.0/32.0)
+    plt.axis('equal')
     break
 
     
