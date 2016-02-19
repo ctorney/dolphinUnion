@@ -24,7 +24,7 @@ for index, row in df.iterrows():
 
     posDF = pd.read_csv(posfilename) 
     
-    outTracks = pd.DataFrame(columns= ['frame','x','y','heading','vx','vy','ax','ay','c_id'])
+    outTracks = pd.DataFrame(columns= ['frame','x','y','dx','dy','heading','vx','vy','ax','ay','c_id'])
     
     #smoothing
     winLen = 10
@@ -55,10 +55,15 @@ for index, row in df.iterrows():
         ya = np.convolve(w2/w2.sum(),ya,mode='same')[(vwinLen):-(vwinLen-1)]
         #xSmooth = xSmooth[(winLen):-(winLen)]
         headings = np.zeros_like(xSmooth)
-        dx = xSmooth[1:]-xSmooth[0:-1]
-        dy = ySmooth[1:]-ySmooth[0:-1]
-        headings[0:-1] = np.arctan2(dy,dx)
-        headings[-1]=headings[-2] 
+        dx = np.zeros_like(xSmooth)
+        dy = np.zeros_like(xSmooth)
+        for i in range(len(headings)):
+            start = max(0,i-5)
+            stop = min(i+5,len(headings))-1
+            dx[i] = xSmooth[stop]-xSmooth[start]
+            dy[i] = ySmooth[stop]-ySmooth[start]
+        headings = np.arctan2(dy,dx)
+        #headings[-1]=headings[-2] 
 #        plot arrows for error checking
 #        x=xSmooth[0:-1]
 #        y=ySmooth[0:-1]
@@ -68,7 +73,7 @@ for index, row in df.iterrows():
 #        plt.axes().set_aspect('equal')
 #        plt.show()
 
-        newcpos = pd.DataFrame(np.column_stack((ft,xSmooth,ySmooth,headings,xv,yv,xa,ya)), columns= ['frame','x','y','heading','vx','vy','ax','ay'])
+        newcpos = pd.DataFrame(np.column_stack((ft,xSmooth,ySmooth,dx,dy,headings,xv,yv,xa,ya)), columns= ['frame','x','y','dx','dy','heading','vx','vy','ax','ay'])
         newcpos['c_id']=cnum
         outTracks = outTracks.append(newcpos,ignore_index=True )
         
@@ -81,7 +86,7 @@ for index, row in df.iterrows():
        #     posDF.set_value(ind,'x',mx)
        #     posDF.set_value(ind,'y',my)
         
-          
+    #    break
 
 
     
