@@ -13,6 +13,7 @@ HD = os.getenv('HOME')
 
 MOVIEDIR = '/media/ctorney/SAMSUNG/data/dolphinUnion/solo/'
 DATADIR = HD + '/Dropbox/dolphin_union/2015_footage/Solo/'
+MOVIEDIR = DATADIR + '/footage/'
 TRACKDIR = DATADIR + '/tracked/'
 LOGDIR = DATADIR + '/logs/'
 FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
@@ -37,6 +38,7 @@ for index, row in df.iterrows():
     outputName = MOVIEDIR + '/TRACKS_' + str(index) + '_' + noext + '.avi'
 
 
+    hdg = -0*math.radians(360-float(geoDF['hdg'][fnum])/100.0)
     linkedDF = pd.read_csv(posName) 
 
     warp_mode = cv2.MOTION_EUCLIDEAN
@@ -74,6 +76,8 @@ for index, row in df.iterrows():
         warp_matrix = np.eye(2, 3, dtype=np.float32)              
         (cc, warp_matrix) = cv2.findTransformECC (im1_gray,im2_gray,warp_matrix, warp_mode, criteria)    
         print(math.degrees(math.acos(warp_matrix[0,0])))
+        cv2.imwrite('shift.png',im1_gray)
+        #out.write(frame)
 #                                    
 #    M = cv2.getRotationMatrix2D((cols/2,rows/2),360-277.53,1)
 #    dst = cv2.warpAffine(frame,M,(cols,rows))

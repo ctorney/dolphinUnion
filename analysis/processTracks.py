@@ -57,6 +57,7 @@ for index, row in df.iterrows():
         headings = np.zeros_like(xSmooth)
         dx = np.zeros_like(xSmooth)
         dy = np.zeros_like(xSmooth)
+        # calculate change in position for 1 second intervals
         for i in range(len(headings)):
             start = max(0,i-5)
             stop = min(i+5,len(headings))-1
