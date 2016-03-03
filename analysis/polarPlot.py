@@ -56,11 +56,11 @@ for thisRow in range(rowCount):
     thisTime = allData[thisRow,0]        
     thisX = allData[thisRow,1]
     thisY = allData[thisRow,2]
-    thisAngle = (allData[thisRow,3])
-    thisTrack = (allData[thisRow,8])
-    thisClip = allData[thisRow,9]
+    thisAngle = (allData[thisRow,5])
+    thisTrack = (allData[thisRow,10])
+    thisClip = allData[thisRow,11]
     # find all animals at this time point in the clip that aren't the focal individual
-    window = allData[(allData[:,0]==thisTime)&(allData[:,9]==thisClip)&(allData[:,8]!=thisTrack),:]
+    window = allData[(allData[:,0]==thisTime)&(allData[:,11]==thisClip)&(allData[:,10]!=thisTrack),:]
     rowLoc = np.zeros((0,5)).astype(np.float32) 
     for w in window:
         xj = w[1]
@@ -77,7 +77,7 @@ for thisRow in range(rowCount):
         accangle = math.atan2(ayj,axj)
         acclength = (ayj**2+axj**2)**0.5
         accangle = accangle - thisAngle
-        angle = math.atan2(dy,dx)
+        #angle = math.atan2(dy,dx)
         theta = math.atan2(math.sin(angle), math.cos(angle))
         jHeading  = math.atan2(math.sin(jAngle), math.cos(jAngle))
         rowLoc = np.vstack((rowLoc,[r, theta, jHeading, accangle,acclength]))
@@ -86,8 +86,8 @@ for thisRow in range(rowCount):
 
 ## POLAR PLOT OF RELATIVE POSITIONS
 #BL = is approx 32 pixels
-binn2=9 # distance bins
-binn1=36
+binn2=19 # distance bins
+binn1=72
 
 dr = 0.5 # width of distance bins
 sr = 0.25 # start point of distance
