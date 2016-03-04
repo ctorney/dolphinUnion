@@ -38,30 +38,31 @@ for index, row in df.iterrows():
     for index, row in posDF.iterrows():
         thisFrame =  row['frame']
         thisID = row['c_id']
-        thisX = row['x']
-        thisY = row['y']
+       
         thisTheta = row['heading']
         # calculate the change in heading from this point to the next
         nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+dt))<1e-6)&(posDF['c_id']==thisID)]
         if len(nextTime)==1:
             posDF.ix[index,'dtheta'] = nextTime.iloc[0]['heading'] -  thisTheta
-        # calculate the average heading all the other caribou were taking at this point
-        excThis = posDF[posDF.c_id!=0]
-        xp = excThis['x'].values
-        yp = excThis['y'].values
-        xdirs = excThis['dx'].values
-        ydirs = excThis['dy'].values
-        kappa = 32.0*32.0
-        dists = (((xp - thisX)**2 + (yp - thisY)**2))
-        weights = np.exp(-dists/kappa)
-        xav = np.sum(weights*xdirs)/np.sum(weights)
-        yav = np.sum(weights*ydirs)/np.sum(weights)
-        posDF.ix[index,'env_heading']  = math.atan2(yav,xav)-  thisTheta
-        
+            thisX = nextTime.iloc[0]['x']
+            thisY = nextTime.iloc[0]['y']
+            # calculate the average heading all the other caribou were taking at this point
+            excThis = posDF[posDF.c_id!=0]
+            xp = excThis['x'].values
+            yp = excThis['y'].values
+            xdirs = excThis['dx'].values
+            ydirs = excThis['dy'].values
+            kappa = 32.0*32.0
+            dists = (((xp - thisX)**2 + (yp - thisY)**2))
+            weights = np.exp(-dists/kappa)
+            xav = np.sum(weights*xdirs)/np.sum(weights)
+            yav = np.sum(weights*ydirs)/np.sum(weights)
+            posDF.ix[index,'env_heading']  = math.atan2(yav,xav)-  thisTheta
+            
 
 
     allDF = allDF.append(posDF,ignore_index=True)
-    break
+
     
 allDF = allDF[np.isfinite(allDF['dtheta'])]
 allDF = allDF.reset_index(drop=True)
