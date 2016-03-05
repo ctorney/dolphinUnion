@@ -14,10 +14,11 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['interaction_length','interaction_angle','rho','alpha','beta','mvector']
+__all__ = ['ignore_length','interaction_length','interaction_angle','rho','alpha','beta','mvector']
 
 
 interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0)
+ignore_length = Uniform('ignore_length', lower=0.05, upper=20.0)
 interaction_angle = Uniform('interaction_angle', lower=0, upper=pi)
 rho = Uniform('rho',lower=0, upper=1)
 alpha = Uniform('alpha',lower=0, upper=1)
@@ -33,7 +34,7 @@ evector = np.load('evector.npy')
 
 
 @stochastic(observed=True)
-def moves(il=interaction_length,ia=interaction_angle, social=rho, al=alpha, be=beta,value=mvector):
+def moves(il=interaction_length,ig=ignore_length, ia=interaction_angle, social=rho, al=alpha, be=beta,value=mvector):
     # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
     # and the assumed interaction function
     
@@ -43,8 +44,10 @@ def moves(il=interaction_length,ia=interaction_angle, social=rho, al=alpha, be=b
     dv[np.abs(mvector)<(1-al)*pi]=mvector[np.abs(mvector)<(1-al)*pi]/(1-al)
         
    # first calculate all the rhos
-    n_weights = np.exp(-neighbours[:,:,0]/il)
+    n_weights = np.exp(-neighbours[:,:,0]/il)*np.tanh(neighbours[:,:,0]/ig)
     n_weights[(neighbours[:,:,0]==0)|(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
+    #n_weights = np.exp(-np.abs(neighbours[:,:,1])/ia)*np.exp(-neighbours[:,:,0]/il)*np.tanh(neighbours[:,:,0]/ig)
+    #n_weights[(neighbours[:,:,0]==0)]=0.0
     
     xpos = np.cos(neighbours[:,:,1])*n_weights
     ypos = np.sin(neighbours[:,:,1])*n_weights
@@ -55,7 +58,7 @@ def moves(il=interaction_length,ia=interaction_angle, social=rho, al=alpha, be=b
 
     #wwc = ((rhos))*(1/(2*pi)) * (1-np.power(rhos,2))/(1+np.power(rhos,2)-2*rhos*np.cos((dv-neighbours[:,:,1].transpose()).transpose())) # weighted wrapped cauchy
     wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((dv-sv).transpose())) # weighted wrapped cauchy
-    
+    wcs[(np.sum(ypos,1)==0)&(np.sum(xpos,1)==0)] = 1/(2*pi)
     wce = (1/(2*pi)) * (1-np.power(be,2))/(1+np.power(be,2)-2*be*np.cos((dv-evector).transpose())) # weighted wrapped cauchy
     # sum along the individual axis to get the total compound cauchy
     #wwc = np.sum(wwc,1)/nc
