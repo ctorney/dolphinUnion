@@ -2,12 +2,12 @@
 import os
 import csv
 import math
-import numpy as np
+
 from datetime import datetime
 from pymc import *
 from numpy import array, empty
 from numpy.random import randint, rand
-import numpy as np
+
 import pandas as pd
 from pymc.Matplot import plot as mcplot
 import matplotlib
@@ -40,9 +40,9 @@ def moves(il=interaction_length,ig=ignore_length, ia=interaction_angle, social=r
     
     dv = np.zeros_like(mvector) # these are the headings (desired vector) without the autocorrelation; new heading = (eta)*(old heading) + (1-eta)*dv
     #lambdas[np.abs(mvector)>pi]=pi
-    dv[np.abs(mvector)>(1-al)*pi]=pi
-    dv[np.abs(mvector)<(1-al)*pi]=mvector[np.abs(mvector)<(1-al)*pi]/(1-al)
-        
+    #dv[np.abs(mvector)>(1-al)*pi]=pi
+    #dv[np.abs(mvector)<(1-al)*pi]=mvector[np.abs(mvector)<(1-al)*pi]/(1-al)
+ #   dv =np.arctan2( (np.sin(mvector)-(1.0-beta)*(1.0-alpha)*np.sin(evector)), (np.cos(mvector)-(1.0-beta)*(1.0-alpha)*np.cos(evector)))
    # first calculate all the rhos
     n_weights = np.exp(-neighbours[:,:,0]/il)*np.tanh(neighbours[:,:,0]/ig)
     n_weights[(neighbours[:,:,0]==0)|(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
@@ -53,18 +53,25 @@ def moves(il=interaction_length,ig=ignore_length, ia=interaction_angle, social=r
     ypos = np.sin(neighbours[:,:,1])*n_weights
     
     sv = np.arctan2(np.sum(ypos,1), np.sum(xpos,1))
+    ysv = np.sin(sv)
+    xsv = np.cos(sv)
+    xsv[(np.sum(ypos,1)==0)&(np.sum(xpos,1)==0)] = 0.0
+    ally = be*ysv+(1.0-be)*(1.0-al)*np.sin(evector)
+    allx = be*xsv+(1.0-be)*(al*np.ones_like(mvector)+(1.0-al)*np.cos(evector))
+    #dv = np.arctan2(np.sum(ypos,1), np.sum(xpos,1))
+    dv = np.arctan2(ally,allx)
     # this isn't necessary here but if there are larger groups each neighbour has to be included and the total normalized
     #nc = np.sum(np.abs(rhos),1) # normalizing constant
 
     #wwc = ((rhos))*(1/(2*pi)) * (1-np.power(rhos,2))/(1+np.power(rhos,2)-2*rhos*np.cos((dv-neighbours[:,:,1].transpose()).transpose())) # weighted wrapped cauchy
-    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((dv-sv).transpose())) # weighted wrapped cauchy
-    wcs[(np.sum(ypos,1)==0)&(np.sum(xpos,1)==0)] = 1/(2*pi)
-    wce = (1/(2*pi)) * (1-np.power(be,2))/(1+np.power(be,2)-2*be*np.cos((dv-evector).transpose())) # weighted wrapped cauchy
+    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((dv-mvector).transpose())) # weighted wrapped cauchy
+ #   wcs[(np.sum(ypos,1)==0)&(np.sum(xpos,1)==0)] = 1/(2*pi)
+ #   wce = (1/(2*pi)) * (1-np.power(be,2))/(1+np.power(be,2)-2*be*np.cos((dv-evector).transpose())) # weighted wrapped cauchy
     # sum along the individual axis to get the total compound cauchy
     #wwc = np.sum(wwc,1)/nc
     #wwc[np.isnan(wwc)]=1/(2*pi)
     
-    wwc = (social/(be+social))*wcs + (be/(be+social))*wce
+  #  wwc = (social/(be+social))*wcs + (be/(be+social))*wce
 #    # next we want to split desired vector into social and environmental vector
 #    sv = np.zeros_like(mvector)
 #    # desired vector  = b*env_vector + (1-b)*social_vector
@@ -83,4 +90,4 @@ def moves(il=interaction_length,ig=ignore_length, ia=interaction_angle, social=r
 #    # sum along the individual axis to get the total compound cauchy
 #    wwc = np.sum(wwc,1)/nc
 #    wwc[np.isnan(wwc)]=1/(2*pi)
-    return np.sum(np.log(wwc))
+    return np.sum(np.log(wcs))
