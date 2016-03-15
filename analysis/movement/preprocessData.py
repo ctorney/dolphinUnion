@@ -47,7 +47,7 @@ for index, row in df.iterrows():
             thisX = nextTime.iloc[0]['x']
             thisY = nextTime.iloc[0]['y']
             # calculate the average heading all the other caribou were taking at this point
-            excThis = posDF[posDF.c_id!=0]
+            excThis = posDF[posDF.c_id!=thisID]
             xp = excThis['x'].values
             yp = excThis['y'].values
             xdirs = excThis['dx'].values
@@ -105,6 +105,8 @@ for index, row in allDF.iterrows():
 allData = allDF.values
 
 
+uid = allDF['clip'].values*10000 + allDF['c_id'].values 
+
 mvector = allDF['dtheta'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
@@ -116,5 +118,6 @@ evector[evector>pi]=evector[evector>pi]-2*pi
 np.save('neighbours.npy', neighbours)
 np.save('mvector.npy', mvector)
 np.save('evector.npy', evector)
+np.save('uid.npy', uid)
     
 

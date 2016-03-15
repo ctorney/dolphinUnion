@@ -65,7 +65,7 @@ for thisRow in range(rowCount):
     for w in window:
         xj = w[1]
         yj = w[2]
-        jAngle = (w[3])
+        jAngle = (w[5])
         r = ((((thisX-xj)**2+(thisY-yj)**2))**0.5) * px_to_m ## BL is 32 pixels
         dx = xj - thisX
         dy = yj - thisY
@@ -275,65 +275,65 @@ axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='xx-l
 
 
 fig1.savefig("toOrigin.png",bbox_inches='tight',dpi=100)
-
-## POLAR PLOT OF ATTRACTION FORCE
-
-
-relAccX = np.cos(locations[:,4])*locations[:,5]
-relAccY = np.sin(locations[:,4])*locations[:,5]
-
-
-# find the average cos and sin of the relative headings to calculate circular statistics
-histX=binned_statistic_2d(x=locations[:,0],y=locations[:,1],values=relAccX, statistic='mean', bins=[r2,theta2])[0]  
-histY=binned_statistic_2d(x=locations[:,0],y=locations[:,1],values=relAccY, statistic='mean', bins=[r2,theta2])[0]  
-
-
-angles = 0.5*(theta2[0:-1]+theta2[1:])
-angles=np.tile(angles,(binn2,1))
-
-toOrigin = -(histX*np.cos(angles) + histY*np.sin(angles))
-fig1=plt.figure(figsize=(8,8))
-ax2=plt.subplot(projection="polar",frameon=False)
-im=ax2.pcolormesh(theta2,r2,toOrigin,lw=0.0,vmin=np.min(toOrigin),vmax=np.max(toOrigin),cmap='viridis')
-ax2.yaxis.set_visible(False)
-
-# angle lines
-ax2.set_thetagrids(angles=np.arange(0,360,45),labels=['', '45°', '90°', '135°', '', '225°','270°', '315°'],frac=1.1)
-ax1 = ax2.figure.add_axes(ax2.get_position(), projection='polar',label='twin', frame_on=False,theta_direction=ax2.get_theta_direction(), theta_offset=ax2.get_theta_offset())
-ax1.yaxis.set_visible(False)
-ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '', '',  '', 'back', '','', ''],frac=1.1)
-#colourbar
-position=fig1.add_axes([1.1,0.12,0.04,0.8])
-cbar=plt.colorbar(im,cax=position) 
-cbar.set_label('Attraction', rotation=90,fontsize='xx-large',labelpad=15)      
-
-#body length legend - draws the ticks and 
-axes=ax2            
-factor = 0.98
-d = axes.get_yticks()[-1] #* factor
-r_tick_labels = [0] + axes.get_yticks()
-r_ticks = (np.array(r_tick_labels) ** 2 + d ** 2) ** 0.5
-theta_ticks = np.arcsin(d / r_ticks) + np.pi / 2
-r_axlabel = (np.mean(r_tick_labels) ** 2 + d ** 2) ** 0.5
-theta_axlabel = np.arcsin(d / r_axlabel) + np.pi / 2
-
-# fixed offsets in x
-offset_spine = transforms.ScaledTranslation(-100, 0, axes.transScale)
-offset_ticklabels = transforms.ScaledTranslation(-10, 0, axes.transScale)
-offset_axlabel = transforms.ScaledTranslation(-40, 0, axes.transScale)
-
-# apply these to the data coordinates of the line/ticks
-trans_spine = axes.transData + offset_spine
-trans_ticklabels = trans_spine + offset_ticklabels
-trans_axlabel = trans_spine + offset_axlabel
-axes.plot(theta_ticks, r_ticks, '-_k', transform=trans_spine, clip_on=False)
-
-# plot the 'tick labels'
-for ii in xrange(len(r_ticks)):
-    axes.text(theta_ticks[ii], r_ticks[ii], "%.0f" % r_tick_labels[ii], ha="right", va="center", clip_on=False, transform=trans_ticklabels)
-
-# plot the 'axis label'
-axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='xx-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
-
-
-fig1.savefig("accToOrigin.png",bbox_inches='tight',dpi=100)
+#
+### POLAR PLOT OF ATTRACTION FORCE
+#
+#
+#relAccX = np.cos(locations[:,4])*locations[:,5]
+#relAccY = np.sin(locations[:,4])*locations[:,5]
+#
+#
+## find the average cos and sin of the relative headings to calculate circular statistics
+#histX=binned_statistic_2d(x=locations[:,0],y=locations[:,1],values=relAccX, statistic='mean', bins=[r2,theta2])[0]  
+#histY=binned_statistic_2d(x=locations[:,0],y=locations[:,1],values=relAccY, statistic='mean', bins=[r2,theta2])[0]  
+#
+#
+#angles = 0.5*(theta2[0:-1]+theta2[1:])
+#angles=np.tile(angles,(binn2,1))
+#
+#toOrigin = -(histX*np.cos(angles) + histY*np.sin(angles))
+#fig1=plt.figure(figsize=(8,8))
+#ax2=plt.subplot(projection="polar",frameon=False)
+#im=ax2.pcolormesh(theta2,r2,toOrigin,lw=0.0,vmin=np.min(toOrigin),vmax=np.max(toOrigin),cmap='viridis')
+#ax2.yaxis.set_visible(False)
+#
+## angle lines
+#ax2.set_thetagrids(angles=np.arange(0,360,45),labels=['', '45°', '90°', '135°', '', '225°','270°', '315°'],frac=1.1)
+#ax1 = ax2.figure.add_axes(ax2.get_position(), projection='polar',label='twin', frame_on=False,theta_direction=ax2.get_theta_direction(), theta_offset=ax2.get_theta_offset())
+#ax1.yaxis.set_visible(False)
+#ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '', '',  '', 'back', '','', ''],frac=1.1)
+##colourbar
+#position=fig1.add_axes([1.1,0.12,0.04,0.8])
+#cbar=plt.colorbar(im,cax=position) 
+#cbar.set_label('Attraction', rotation=90,fontsize='xx-large',labelpad=15)      
+#
+##body length legend - draws the ticks and 
+#axes=ax2            
+#factor = 0.98
+#d = axes.get_yticks()[-1] #* factor
+#r_tick_labels = [0] + axes.get_yticks()
+#r_ticks = (np.array(r_tick_labels) ** 2 + d ** 2) ** 0.5
+#theta_ticks = np.arcsin(d / r_ticks) + np.pi / 2
+#r_axlabel = (np.mean(r_tick_labels) ** 2 + d ** 2) ** 0.5
+#theta_axlabel = np.arcsin(d / r_axlabel) + np.pi / 2
+#
+## fixed offsets in x
+#offset_spine = transforms.ScaledTranslation(-100, 0, axes.transScale)
+#offset_ticklabels = transforms.ScaledTranslation(-10, 0, axes.transScale)
+#offset_axlabel = transforms.ScaledTranslation(-40, 0, axes.transScale)
+#
+## apply these to the data coordinates of the line/ticks
+#trans_spine = axes.transData + offset_spine
+#trans_ticklabels = trans_spine + offset_ticklabels
+#trans_axlabel = trans_spine + offset_axlabel
+#axes.plot(theta_ticks, r_ticks, '-_k', transform=trans_spine, clip_on=False)
+#
+## plot the 'tick labels'
+#for ii in xrange(len(r_ticks)):
+#    axes.text(theta_ticks[ii], r_ticks[ii], "%.0f" % r_tick_labels[ii], ha="right", va="center", clip_on=False, transform=trans_ticklabels)
+#
+## plot the 'axis label'
+#axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='xx-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
+#
+#
+#fig1.savefig("accToOrigin.png",bbox_inches='tight',dpi=100)

@@ -14,6 +14,7 @@ from scipy.interpolate import griddata
 from scipy.stats import binned_statistic_2d
 import pandas as pd
 import math
+from math import *
 from matplotlib import transforms
 from viridis import viridis
 plt.register_cmap(name='viridis', cmap=viridis)
@@ -29,12 +30,25 @@ binn1=72
 dr = 0.5 # width of distance bins
 sr = 0.25 # start point of distance
 maxr=sr+(dr*binn2)
-vis_angle = 0.27
+#vis_angle = 0.31
 theta2 = np.linspace(0,2.0 * np.pi, binn1+1)
 #theta2 = np.linspace(-vis_angle,vis_angle, binn1+1)
 r2 = np.linspace(sr, maxr, binn2+1)
 areas = pi*((r2+dr)**2-r2**2)
-areas = np.exp(-r2/10)*np.tanh(r2/2)
+
+aa = np.load( 'decay_exponent.npy')
+bb = np.load( 'interaction_length.npy')
+cc = np.load( 'interaction_angle.npy')
+ig=np.mean(aa)
+ir=np.mean(bb)
+vis_angle = np.mean(cc)
+
+
+areas = (np.exp((1.0/ig)*(1-(r2/ir)**ig))*(r2/ir))#**ig
+    
+#ig=3.11
+#ir=3.87
+#areas = np.exp(-r2/ir)*np.tanh(r2/ig)
 areas=np.tile(areas,(binn1,1)).T
 
 for i in range(binn1):
@@ -61,7 +75,7 @@ ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '', '',  '', 'bac
 #colourbar
 position=fig1.add_axes([1.1,0.12,0.04,0.8])
 cbar=plt.colorbar(im,cax=position) 
-cbar.set_label('Neighbour density', rotation=90,fontsize='xx-large',labelpad=15)      
+cbar.set_label('Social weighting', rotation=90,fontsize='xx-large',labelpad=15)      
 
 #body length legend - draws the ticks and 
 axes=ax2            
