@@ -24,10 +24,10 @@ plt.register_cmap(name='viridis_r', cmap=viridis_r)
  
 ## POLAR PLOT OF RELATIVE POSITIONS
 #BL = is approx 32 pixels
-binn2=19 # distance bins
-binn1=72
+binn2=299 # distance bins
+binn1=720
 
-dr = 0.5 # width of distance bins
+dr = 0.1 # width of distance bins
 sr = 0.25 # start point of distance
 maxr=sr+(dr*binn2)
 #vis_angle = 0.31

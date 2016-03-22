@@ -57,10 +57,10 @@ for index, row in df.iterrows():
         headings = np.zeros_like(xSmooth)
         dx = np.zeros_like(xSmooth)
         dy = np.zeros_like(xSmooth)
-        # calculate change in position for 1 second intervals
+        # calculate change in position for 5 second intervals
         for i in range(len(headings)):
-            start = max(0,i-5)
-            stop = min(i+5,len(headings))-1
+            start = max(0,i-25)
+            stop = min(i+25,len(headings))-1
             dx[i] = xSmooth[stop]-xSmooth[start]
             dy[i] = ySmooth[stop]-ySmooth[start]
         headings = np.arctan2(dy,dx)

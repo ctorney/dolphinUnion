@@ -49,9 +49,9 @@ mcplot(M)
 #show()
 aa = (M.trace('alpha')[:])
 bb = (M.trace('beta')[:])
-ev=(1-aa)*(1-bb)
-sv=bb
-mv=(aa)*(1-bb)
+mv=(1-bb)*(1-aa)
+sv=aa
+ev=(bb)*(1-aa)
 plt.hist(mv,normed=True, label='memory')
 plt.hist(sv,normed=True, label='social')
 plt.hist(ev,normed=True, label='environment')
@@ -62,14 +62,24 @@ plt.show()
 plt.savefig('heading_weights.png')
 
 
-plt.hist((M.trace('rho')[:]),normed=True)
+plt.hist((M.trace('rho_s')[:]),normed=True, label='s')
+plt.hist((M.trace('rho_m')[:]),normed=True, label='m')
+plt.hist((M.trace('rho_e')[:]),normed=True, label='environment')
+
+plt.xlim(0.7,1.0)
+plt.legend(loc='upper center')
+plt.show()
+
+
+plt.hist((M.trace('beta')[:]),normed=True,label='beta')
 
 plt.xlim(0.9,0.94)
+plt.legend(loc='upper center')
 plt.show()
 plt.savefig('rho.png')
 
 
-mrho = 0.913
+mrho = 0.96
 xx = np.linspace(-3.142,3.142,1000)
 yy = (1.0/(2.0*math.pi))*(1.0-mrho**2)/(1.0+mrho**2-2*mrho*np.cos(xx))
 plt.xlim(-3.142,3.142)
@@ -77,8 +87,11 @@ plt.ylim(0,4)
 plt.plot(xx,yy,color='blue',linewidth=2)
 plt.fill_between(xx, 0, yy, color='blue', alpha=.25)
 
-np.save('rho.npy',M.trace('rho')[:])
+np.save('rho_e.npy',M.trace('rho_e')[:])
+np.save('rho_m.npy',M.trace('rho_m')[:])
+np.save('rho_s.npy',M.trace('rho_s')[:])
 np.save('interaction_angle.npy',M.trace('interaction_angle')[:])
+np.save('angle_decay.npy',M.trace('angle_decay')[:])
 np.save('beta.npy',M.trace('beta')[:])
 np.save('interaction_length.npy',M.trace('interaction_length')[:])
 np.save('decay_exponent.npy',M.trace('decay_exponent')[:])

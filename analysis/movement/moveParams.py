@@ -4,7 +4,7 @@ import csv
 import math
 import numpy as np
 from datetime import datetime
-
+import math as m
 from numpy import array, empty
 from numpy.random import randint, rand
 import numpy as np
@@ -15,57 +15,64 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-
-neighbours = np.load('neighbours.npy')
-mvector = np.load('mvector.npy')
-evector = np.load('evector.npy')
+allNeighbours= np.load('neighbours.npy')
+allMvector = np.load('mvector.npy')
+allEvector = np.load('evector.npy')
     
 
+aa = np.load('decay_exponent.npy')
+bb = np.load('interaction_length.npy')
+cc = np.load('interaction_angle.npy')
+social = np.mean(np.load('rho_s.npy'))
+re = np.mean(np.load('rho_e.npy'))
+rm = np.mean(np.load('rho_m.npy'))
+de=np.mean(aa)
+il=np.mean(bb)
+ia = np.mean(cc)
+be = np.mean(np.load('beta.npy'))
+uid = np.load('uid.npy')
 
 
-il=20
-ia = 0.8
-al = 0.0
-rl = 0.88
-ig=1
-
-
-rholist = np.arange(0.01,1,0.01)
+rholist = np.arange(0.01,1.0,0.01)
 probs = np.zeros_like(rholist)
-
-for i in range(len(rholist)):
-
-    # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
-    # and the assumed interaction function
-    be = 0.92
-    alpha = 0.5
+thisID = 2
+for thisID2 in range(1):
+    thisID=3
+    neighbours = allNeighbours[uid==thisID]
+    mvector =allMvector[uid==thisID]
+    evector =allEvector[uid==thisID]
     
-    social = rholist[i]#0.95
-    il =10# 100*rholist[i]
-    dv = np.zeros_like(mvector) # these are the headings (desired vector) without the autocorrelation; new heading = (eta)*(old heading) + (1-eta)*dv
-    #lambdas[np.abs(mvector)>pi]=pi
+    for i in range(len(rholist)):
+    
+        # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
+        # and the assumed interaction function
+    
+        al = rholist[i]
         
-    
-    n_weights = np.exp(-neighbours[:,:,0]/il)*np.tanh(neighbours[:,:,0]/ig)
-    n_weights[(neighbours[:,:,0]==0)|(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
-    #n_weights = np.exp(-np.abs(neighbours[:,:,1])/ia)*np.exp(-neighbours[:,:,0]/il)*np.tanh(neighbours[:,:,0]/ig)
-    #n_weights[(neighbours[:,:,0]==0)]=0.0
-    
-    xpos = np.cos(neighbours[:,:,1])*n_weights
-    ypos = np.sin(neighbours[:,:,1])*n_weights
-    
-    sv = np.arctan2(np.sum(ypos,1), np.sum(xpos,1))
-    ysv = np.sin(sv)
-    xsv = np.cos(sv)
-    xsv[(np.sum(ypos,1)==0)&(np.sum(xpos,1)==0)] = 0.0
-    ally = be*ysv+(1.0-be)*(1.0-alpha)*np.sin(evector)
-    allx = be*xsv+(1.0-be)*(alpha*np.ones_like(mvector)+(1.0-alpha)*np.cos(evector))
-    dv = np.arctan2(ally,allx)
-    # this isn't necessary here but if there are larger groups each neighbour has to be included and the total normalized
-    #nc = np.sum(np.abs(rhos),1) # normalizing constant
-
-    #wwc = ((rhos))*(1/(2*pi)) * (1-np.power(rhos,2))/(1+np.power(rhos,2)-2*rhos*np.cos((dv-neighbours[:,:,1].transpose()).transpose())) # weighted wrapped cauchy
-    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((dv-mvector).transpose())) # weighted wrapped cauchy
-    probs[i]= np.sum(np.log(wcs))
-plt.figure
-plt.plot(rholist,probs)
+    #    social = rholist[i]#0.95
+     #   il =10# 100*rholist[i]
+        dv = np.zeros_like(mvector) # these are the headings (desired vector) without the autocorrelation; new heading = (eta)*(old heading) + (1-eta)*dv
+        #lambdas[np.abs(mvector)>pi]=pi
+            
+        
+        n_weights = ((neighbours[:,:,0]/il)*np.exp((1.0/de)*(1.0-(neighbours[:,:,0]/il)**de)))
+        n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
+     
+        xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1)
+        ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1)
+        
+        lens = np.sqrt(xsv**2+ysv**2)
+        ysv[lens>1]=ysv[lens>1]/lens[lens>1]
+        xsv[lens>1]=xsv[lens>1]/lens[lens>1]
+        svv = np.arctan2(ysv,xsv)
+        lens = np.sqrt(xsv**2+ysv**2)
+        als = al*lens
+        socials=lens*social
+        wcs = (1/(2*m.pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
+        wce = (1/(2*m.pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
+        wcm = (1/(2*m.pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+        #print(np.sum(np.log(wcs)))
+        wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
+        probs[i]= np.sum(np.log(wcc))
+    plt.figure
+    plt.plot(rholist,probs)

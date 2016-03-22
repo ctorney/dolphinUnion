@@ -14,13 +14,14 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['decay_exponent','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
+__all__ = ['decay_exponent','interaction_length','interaction_angle','angle_decay','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
 
 
 interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0)
 #ignore_length = DiscreteUniform('ignore_length', lower=1, upper=3)#,value=1.0)
 decay_exponent = Uniform('decay_exponent', lower=0.5, upper=10.0)#,value=1.0)
 interaction_angle = Uniform('interaction_angle', lower=0, upper=pi)
+angle_decay = Uniform('angle_decay', lower=0, upper=50.0,value=20.0)
 rho_s = Uniform('rho_s',lower=0, upper=1)
 rho_m = Uniform('rho_m',lower=0, upper=1)
 rho_e = Uniform('rho_e',lower=0, upper=1)
@@ -36,10 +37,10 @@ sin_ev = np.sin(evector)
 cos_ev = np.cos(evector)
     
 @deterministic(plot=False)
-def social_vector(il=interaction_length, de=decay_exponent, ia=interaction_angle):
+def social_vector(il=interaction_length, de=decay_exponent, ia=interaction_angle, ad=angle_decay):
         
-    n_weights = ((neighbours[:,:,0]/il)*np.exp((1.0/de)*(1.0-(neighbours[:,:,0]/il)**de)))
-    n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
+    n_weights = ((neighbours[:,:,0]/il)*np.exp((1.0/de)*(1.0-(neighbours[:,:,0]/il)**de)))*(0.5+0.5*np.tanh(ad*(ia-np.abs(neighbours[:,:,1]))))
+    #n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
  
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1)

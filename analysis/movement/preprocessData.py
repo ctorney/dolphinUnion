@@ -31,8 +31,8 @@ for index, row in df.iterrows():
     gridPosfilename = DATADIR + '/GRIDPOS_' + str(index) + '_' + noext + '.npy'
     posDF = pd.read_csv(posfilename) 
     posDF['clip']=index
-    posDF = posDF[posDF['frame']%60==0]
-    dt = 60 # 60 frames is 1 second
+    posDF = posDF[posDF['frame']%120==0]
+    dt = 120 # 60 frames is 1 second
     posDF['dtheta']=np.NaN
     posDF['env_heading']=np.NaN
     for index, row in posDF.iterrows():

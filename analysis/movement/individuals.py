@@ -1,10 +1,10 @@
 
 import os
-import csv
-import math
+import csv 
+import math as m
 
 from datetime import datetime
-from pymc import *
+
 from numpy import array, empty
 from numpy.random import randint, rand
 
@@ -15,10 +15,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
+    
 def moves(x,params):
     neighbours = params[0]
     mvector = params[1]
     evector = params[2]
+    
+    
     al=x[0]
     be=x[1]
     n_weights = ((neighbours[:,:,0]/il)*np.exp((1.0/de)*(1.0-(neighbours[:,:,0]/il)**de)))
@@ -27,18 +30,20 @@ def moves(x,params):
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1)
     
-    lens = (xsv**2+ysv**2)
+    lens = np.sqrt(xsv**2+ysv**2)
     ysv[lens>1]=ysv[lens>1]/lens[lens>1]
     xsv[lens>1]=xsv[lens>1]/lens[lens>1]
-    ally = be*ysv+(1.0-be)*(1.0-al)*np.sin(evector)
-    allx = be*xsv+(1.0-be)*(al*np.ones_like(mvector)+(1.0-al)*np.cos(evector))
-    #dv = np.arctan2(np.sum(ypos,1), np.sum(xpos,1))
-    dv = np.arctan2(ally,allx)
+    svv = np.arctan2(ysv,xsv)
     
-    # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
-    # and the assumed interaction function
-    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((dv-mvector).transpose())) # weighted wrapped cauchy
-    return -np.sum(np.log(wcs))
+    als = al*lens
+    socials=lens*social
+    wcs = (1/(2*m.pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
+    wce = (1/(2*m.pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
+    wcm = (1/(2*m.pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+    wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
+    #print(wcs,wce,wcm)
+    return -np.sum(np.log(wcc))
+
 
 
 def socialmoves(be,params):
@@ -64,15 +69,16 @@ def socialmoves(be,params):
 aa = np.load('decay_exponent.npy')
 bb = np.load('interaction_length.npy')
 cc = np.load('interaction_angle.npy')
-dd = np.load('rho.npy')
+social = np.mean(np.load('rho_s.npy'))
+re = np.mean(np.load('rho_e.npy'))
+rm = np.mean(np.load('rho_m.npy'))
 alpha = np.load('alpha.npy')
 beta = np.load('beta.npy')
 uid = np.load('uid.npy')
 
 de=np.mean(aa)
-il=10#np.mean(bb)
-ia = 1.0#np.mean(cc)
-social = np.mean(dd)
+il=np.mean(bb)
+ia = np.mean(cc)
 x0 = (np.mean(alpha),np.mean(beta))
 allNeighbours = np.load('neighbours.npy')
 allMvector = np.load('mvector.npy')
@@ -87,22 +93,35 @@ results = np.zeros((len(allIDs),2))
 lengths = np.zeros((len(allIDs)))
 index=0
 x0=(0.5,0.5)
-for thisID in allIDs:
+bbb =np.mean(beta)
+
+alss=np.arange(0,1,0.01)
+vals = np.zeros(len(alss))
+ind=0
+for aaa in alss:
+    parameters = (allNeighbours,allMvector,allEvector)
+    vals[ind] = moves((aaa,bbb),parameters)
+    ind=ind+1
     
-    parameters = (allNeighbours[uid==thisID],allMvector[uid==thisID],allEvector[uid==thisID])
-    result = minimize(moves, x0, args=(parameters,), method='TNC',bounds=bnds, options={'maxiter':100})
-    results[index] = (result.x[0],result.x[1])
-    results[index,1] = socialmoves(result.x[1],parameters)
-    lengths[index]=len(allMvector[uid==thisID])
-    index=index+1
-    #break
-#print(moves(allNeighbours,allMvector,0,1))
-    
-#plt.plot(results[:,0],results[:,1],'.')
 
-plt.hist(results[:,1],bins=15,range=(0.1,1.0))
-
-#plt.hist(results[:,0],bins=100)
-#plt.hist(lengths,bins=100)
-
-
+plt.plot(vals)
+#
+#for thisID in allIDs:
+#    
+#    parameters = (allNeighbours[uid==thisID],allMvector[uid==thisID],allEvector[uid==thisID])
+#    result = minimize(moves, x0, args=(parameters,), method='TNC',bounds=bnds, options={'maxiter':100})
+#    results[index] = (result.x[0],result.x[1])
+#    #results[index,1] = socialmoves(result.x[1],parameters)
+#    lengths[index]=len(allMvector[uid==thisID])
+#    index=index+1
+#    #break
+##print(moves(allNeighbours,allMvector,0,1))
+#    
+##plt.plot(results[:,0],results[:,1],'.')
+#
+#plt.hist(results[:,0],bins=200,range=(0.0,1.0))
+#
+##plt.hist(results[:,0],bins=100)
+##plt.hist(lengths,bins=100)
+#
+#
