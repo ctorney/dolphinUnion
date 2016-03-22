@@ -43,20 +43,10 @@ sourceArray2 = [random.normalvariate(0,1) for r in range(numObservations)]
 
 
     
-    
-aa = np.load('decay_exponent.npy')
-bb = np.load('interaction_length.npy')
-cc = np.load('interaction_angle.npy')
-social = np.mean(np.load('rho_s.npy'))
-re = np.mean(np.load('rho_e.npy'))
-rm = np.mean(np.load('rho_m.npy'))
-alpha = np.load('alpha.npy')
-beta = np.load('beta.npy')
-uid = np.load('uid.npy')
-
-de=np.mean(aa)
-il=np.mean(bb)
-ia = np.mean(cc)
+uid = np.load('uid.npy')    
+de=0.5
+il=5
+ia = 0.3
 
 allNeighbours = np.load('neighbours.npy')
 allMvector = np.load('mvector.npy')
@@ -70,7 +60,7 @@ allIDs = np.unique(uid)
 
 index=0
 x0=(0.5,0.5)
-bbb =np.mean(beta)
+#bbb =np.mean(beta)
 
 alss=np.arange(0,1,0.01)
 vals = np.zeros(len(alss))

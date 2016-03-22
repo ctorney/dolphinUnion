@@ -95,6 +95,7 @@ for index, row in df.iterrows():
         fc = fc + 1
         if fc>totalFrames:
             break
+        #frame = frame[frame.c_id==0]
         xp = frame['x'].values
         yp = frame['y'].values
         xh = 0.1*frame['dx'].values
