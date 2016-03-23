@@ -18,17 +18,22 @@ from scipy.optimize import minimize
 from sklearn.neighbors import KernelDensity
 X_plot = np.linspace(0, 2, 1000)[:, np.newaxis]
     
-teCalc.initialise(1, 0.25)
+teCalc.initialise(1, 0.3)
 index=0
 results = np.zeros((len(allIDs)))
 lengths = np.zeros((len(allIDs)))
 ids = np.zeros((len(allIDs)))
 #thisID=100
-ia=0.3007855
+cc = np.load( 'interaction_angle.npy')
+#ig=np.mean(aa)
+#ir=np.mean(bb)
+ia=np.mean(cc)#0.7855
 de=0.2
 il=15
 allSVV = np.array([])
 allSVV2 = np.array([])
+
+
 for thisID in allIDs:
     
     neighbours = allNeighbours[uid==thisID]
@@ -71,24 +76,23 @@ for thisID in allIDs:
     
     
     mvect2 = allMvector[uid==thisID]
-    if len(mvect2)<25:
-        continue
+    #if len(mvect2)<25:
+    #    continue
     mvect2 = mvect2[(xsv2!=0)|(ysv2!=0)]
-    print(len(mvect2))
-    svv = svv2[(xsv2!=0)|(ysv2!=0)]
+    svv2 = svv2[(xsv2!=0)|(ysv2!=0)]
     mvector = np.zeros_like(mvect2)
     mvector[:-1] = mvect2[1:]
     lengths[index]=len(allMvector[uid==thisID])
    
     
-    if len(mvect2)<25:
+    if len(mvect2)<30:
         continue
     ids[index]=thisID
     index = index+1
      # Use history length 1 (Schreiber k=1), kernel width of 0.5 normalised units
     #teCalc.setObservations(JArray(JDouble, 1)(sourceArray2), JArray(JDouble, 1)(destArray))
     
-    teCalc.setObservations(JArray(JDouble, 1)(svv.tolist()), JArray(JDouble, 1)(mvector.tolist()))
+    teCalc.setObservations(JArray(JDouble, 1)(svv2.tolist()), JArray(JDouble, 1)(mvector.tolist()))
     # For copied source, should give something close to 1 bit:
     result = teCalc.computeAverageLocalOfObservations()
     results[index-1] = result#*lengths[index]
@@ -113,6 +117,7 @@ for thisID in allIDs:
 #plt.annotate(ids[:index], xy = (lengths[:index],results[:index]), xytext = (0, 0), textcoords = 'offset points')
 #plt.figure
 res = (results[:index])
+ids = (ids[:index])
 #res = res[res>0]
 
 kde = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(res[:,np.newaxis])
@@ -126,3 +131,24 @@ n, xe = np.histogram(lengths[:index], bins=xbins)
 sy, _ = np.histogram(lengths[:index], bins=xbins, weights=results[:index])
 means = sy / n
 #plt.plot(xe[:-1],means)
+
+for idx,val in enumerate(log_dens):
+    if idx==0:
+        prev = val
+        prevInc=True
+        continue
+    if val>prev:
+        increasing=True
+    else:
+        increasing=False
+    if prevInc!=increasing:
+        if increasing:
+            threshold = X_plot[idx]
+    prevInc = increasing
+    prev=val
+
+threshold=0.6006006
+leaders = ids[res<threshold]
+followers = ids[res>threshold]
+#np.save('leaders.npy',leaders)
+#np.save('followers.npy',followers)
