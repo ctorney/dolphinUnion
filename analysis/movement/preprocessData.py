@@ -76,7 +76,7 @@ for index, row in allDF.iterrows():
     if len(window)>maxN:
         maxN=len(window)#
 
-neighbours = np.zeros((dsize,maxN,2)).astype(np.float32) # dist, angle
+neighbours = np.zeros((dsize,maxN,3)).astype(np.float32) # dist, angle
 #pixels are rescaled to meters based on flying at a height of 100m - camera fov = 60
 px_to_m = 100*2.0*math.tan(math.radians(30))/1920.0
 
@@ -93,12 +93,14 @@ for index, row in allDF.iterrows():
     for i2, w in window.iterrows():
         xj = w.x
         yj = w.y
+        w_id = w['clip']*10000 + w['c_id']
         neighbours[index,ncount,0] = ((((thisX-xj)**2+(thisY-yj)**2))**0.5) * px_to_m 
         dx = xj - thisX
         dy = yj - thisY
         angle = math.atan2(dy,dx)
         angle = angle - thisAngle
         neighbours[index,ncount,1] = math.atan2(math.sin(angle), math.cos(angle))
+        neighbours[index,ncount,2] = w_id
         ncount+=1
 
 # convert to a numpy array
