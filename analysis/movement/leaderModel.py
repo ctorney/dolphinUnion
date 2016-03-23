@@ -33,14 +33,24 @@ beta = Uniform('beta',lower=0, upper=1)
 neighbours = np.load('neighbours.npy')
 mvector = np.load('mvector.npy')
 evector = np.load('evector.npy')
+uid = np.load('uid.npy')
+leaders = np.load('../leaders.npy')
+
+leadIndexes=np.in1d(uid,leaders)
+neighbours= neighbours[leadIndexes]
+mvector = mvector[leadIndexes]
+evector = evector[leadIndexes]
+
+
+
 sin_ev = np.sin(evector)
 cos_ev = np.cos(evector)
     
 @deterministic(plot=False)
 def social_vector(il=interaction_length, de=decay_exponent, ia=interaction_angle, ad=angle_decay):
         
-    n_weights = ((neighbours[:,:,0]/il)*np.exp((1.0/de)*(1.0-(neighbours[:,:,0]/il)**de)))*(0.5+0.5*np.tanh(ad*(ia-np.abs(neighbours[:,:,1]))))
-    #n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
+    n_weights = ((neighbours[:,:,0]/il)*np.exp((1.0/de)*(1.0-(neighbours[:,:,0]/il)**de)))#*(0.5+0.5*np.tanh(ad*(ia-np.abs(neighbours[:,:,1]))))
+    n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
  
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1)
