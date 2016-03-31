@@ -19,11 +19,11 @@ OUTDIR =  HD + '/Dropbox/dolphin_union/2015_footage/Solo/processedTracks/'
 df = pd.read_csv(FILELIST)
 for index, row in df.iterrows():
     noext, ext = os.path.splitext(row.filename)   
-    posfilename = DATADIR + 'tracked/FINAL_' + str(index) + '_' + noext + '.csv'
+    posfilename = DATADIR + 'tracked/RELINKED_' + str(index) + '_' + noext + '.csv'
     outname = OUTDIR + '/TRACKS_' + str(index) + '_' + noext + '.csv'
 
     posDF = pd.read_csv(posfilename) 
-    
+    #break
     outTracks = pd.DataFrame(columns= ['frame','x','y','dx','dy','heading','vx','vy','ax','ay','c_id'])
     
     #smoothing
@@ -33,7 +33,9 @@ for index, row in df.iterrows():
     w = w/w.sum()
     w2 = np.kaiser(vwinLen,1)
     w2 = w2/w2.sum()
-    for cnum, cpos in posDF.groupby('c_id'):
+    for cnum, cpos2 in posDF.groupby('c_id'):
+        cpos = cpos2.groupby(['frame','c_id'],as_index=False).agg(np.mean)
+
         ft = cpos['frame'].values
         xd = cpos['x'].values
         xd = np.r_[np.ones((winLen))*xd[0],xd,np.ones((winLen))*xd[-1]]
@@ -90,6 +92,6 @@ for index, row in df.iterrows():
     #    break
 
 
-    
+    #break
     outTracks.to_csv(outname, index=False)
 

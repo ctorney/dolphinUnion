@@ -1,18 +1,47 @@
-#tester
+
 
 
 from matplotlib import pylab as plt
 import numpy as np
 
+import networkModel
 import constantModel
-import pymc
-from pymc import MCMC
-from pymc.Matplot import plot as mcplot
-M = MCMC(constantModel)
 
-#M.use_step_method(pymc.AdaptiveMetropolis, [M.left_angle, M.right_angle, M.lag, M.dist],  delay=1000)
-M.sample(iter=20000, burn=10000, thin=10,verbose=0)
-mcplot(M)
+import distanceModel
+import hybridModel
+import hybridModelv2
+import pymc
+from pymc import MAP
+from pymc.Matplot import plot as mcplot
+
+
+CM = MAP(constantModel)
+CM.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(CM.AIC)
+print(CM.BIC)
+
+
+DM = MAP(distanceModel)
+DM.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(DM.AIC)
+print(DM.BIC)
+
+
+NM = MAP(networkModel)
+NM.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(NM.AIC)
+print(NM.BIC)
+
+HM = MAP(hybridModel)
+HM.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(HM.AIC)
+print(HM.BIC)
+
+HM2 = MAP(hybridModelv2)
+HM2.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(HM2.AIC)
+print(HM2.BIC)
+
 #from pylab import hist, show
 
 #
@@ -87,15 +116,15 @@ mcplot(M)
 #plt.plot(xx,yy,color='blue',linewidth=2)
 #plt.fill_between(xx, 0, yy, color='blue', alpha=.25)
 #
-np.save('rho_e.npy',M.trace('rho_e')[:])
-np.save('rho_m.npy',M.trace('rho_m')[:])
-np.save('rho_s.npy',M.trace('rho_s')[:])
-np.save('interaction_angle.npy',M.trace('interaction_angle')[:])
+#np.save('rho_e.npy',M.trace('rho_e')[:])
+#np.save('rho_m.npy',M.trace('rho_m')[:])
+#np.save('rho_s.npy',M.trace('rho_s')[:])
+#np.save('interaction_angle.npy',M.trace('interaction_angle')[:])
 #np.save('angle_decay.npy',M.trace('angle_decay')[:])
-np.save('beta.npy',M.trace('beta')[:])
-np.save('interaction_length.npy',M.trace('interaction_length')[:])
+#np.save('beta.npy',M.trace('beta')[:])
+#np.save('interaction_length.npy',M.trace('interaction_length')[:])
 #np.save('decay_exponent.npy',M.trace('decay_exponent')[:])
-np.save('alpha.npy',M.trace('alpha')[:])
+#np.save('alpha.npy',M.trace('alpha')[:])
 #
 #
 #

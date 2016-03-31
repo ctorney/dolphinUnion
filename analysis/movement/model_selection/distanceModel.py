@@ -17,15 +17,15 @@ import matplotlib.pyplot as plt
 __all__ = ['decay_exponent','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
 
 
-interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0)
+interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=5.1245)
 #ignore_length = DiscreteUniform('ignore_length', lower=1, upper=3)#,value=1.0)
-decay_exponent = Uniform('decay_exponent', lower=0.5, upper=50.0)#,value=1.0)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi)
-rho_s = Uniform('rho_s',lower=0, upper=1)
-rho_m = Uniform('rho_m',lower=0, upper=1)
-rho_e = Uniform('rho_e',lower=0, upper=1)
-alpha = Uniform('alpha',lower=0, upper=1)
-beta = Uniform('beta',lower=0, upper=1)
+decay_exponent = Uniform('decay_exponent', lower=0.5, upper=50.0,value=0.9369)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2579)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9681)
+rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9212)
+rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9550)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.2933)
+beta = Uniform('beta',lower=0, upper=1,value=0.1359)
 # rho is tanh(a dx) * exp(-b dx)
 # the inflexion point is located at (1/2a)ln(2a/b + sqrt((2a/b)^2+1)
 
@@ -62,9 +62,10 @@ def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, v
     # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
     # and the assumed interaction function
     svv = np.arctan2(sv[:,1],sv[:,0])
-    lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
-    als = al*lens
-    socials=lens*social
+    #lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
+    als = al*np.ones_like(svv)
+    als[(sv[:,1]==0)&(sv[:,0]==0)]=0
+    socials=social#lens*social
     wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
     wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
     wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy

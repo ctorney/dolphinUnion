@@ -24,10 +24,10 @@ plt.register_cmap(name='viridis_r', cmap=viridis_r)
  
 ## POLAR PLOT OF RELATIVE POSITIONS
 #BL = is approx 32 pixels
-binn2=299 # distance bins
+binn2=80 # distance bins
 binn1=720
 
-dr = 0.1 # width of distance bins
+dr = 0.25 # width of distance bins
 sr = 0.25 # start point of distance
 maxr=sr+(dr*binn2)
 #vis_angle = 0.31
@@ -41,10 +41,11 @@ bb = np.load( 'interaction_length.npy')
 cc = np.load( 'interaction_angle.npy')
 ig=np.mean(aa)
 ir=np.mean(bb)
-vis_angle = np.mean(cc)
-
-
-areas = (np.exp((1.0/ig)*(1-(r2/ir)**ig))*(r2/ir))#**ig
+vis_angle = 0.2203#np.mean(cc)
+il = 14.2296
+areas=np.ones_like(r2)
+areas[r2>il]=0.0
+#areas = (np.exp((1.0/ig)*(1-(r2/ir)**ig))*(r2/ir))#**ig
     
 #ig=3.11
 #ir=3.87

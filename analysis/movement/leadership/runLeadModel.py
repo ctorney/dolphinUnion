@@ -4,11 +4,11 @@
 from matplotlib import pylab as plt
 import numpy as np
 
-import constantModel
+import leaderModel
 import pymc
 from pymc import MCMC
 from pymc.Matplot import plot as mcplot
-M = MCMC(constantModel)
+M = MCMC(leaderModel)
 
 #M.use_step_method(pymc.AdaptiveMetropolis, [M.left_angle, M.right_angle, M.lag, M.dist],  delay=1000)
 M.sample(iter=20000, burn=10000, thin=10,verbose=0)
@@ -52,9 +52,18 @@ mcplot(M)
 #mv=(1-bb)*(1-aa)
 #sv=aa
 #ev=(bb)*(1-aa)
-#plt.hist(mv,normed=True, label='memory')
-#plt.hist(sv,normed=True, label='social')
-#plt.hist(ev,normed=True, label='environment')
+#plt.hist(mv,normed=True, label='memory-lead')
+#plt.hist(sv,normed=True, label='social-lead')
+#plt.hist(ev,normed=True, label='environment-lead')
+#
+#aa=np.load('/home/ctorney/Dropbox/tmp/alpha_follow.npy')
+#bb=np.load('/home/ctorney/Dropbox/tmp/beta_follow.npy')
+#mv=(1-bb)*(1-aa)
+#sv=aa
+#ev=(bb)*(1-aa)
+#plt.hist(mv,normed=True, label='memory-follow')
+#plt.hist(sv,normed=True, label='social-follow')
+#plt.hist(ev,normed=True, label='environment-follow')
 #
 #plt.legend(loc='upper center')
 #plt.xlim(0,1)
@@ -86,16 +95,20 @@ mcplot(M)
 #plt.ylim(0,4)
 #plt.plot(xx,yy,color='blue',linewidth=2)
 #plt.fill_between(xx, 0, yy, color='blue', alpha=.25)
-#
+
 np.save('rho_e.npy',M.trace('rho_e')[:])
 np.save('rho_m.npy',M.trace('rho_m')[:])
 np.save('rho_s.npy',M.trace('rho_s')[:])
-np.save('interaction_angle.npy',M.trace('interaction_angle')[:])
-#np.save('angle_decay.npy',M.trace('angle_decay')[:])
 np.save('beta.npy',M.trace('beta')[:])
-np.save('interaction_length.npy',M.trace('interaction_length')[:])
-#np.save('decay_exponent.npy',M.trace('decay_exponent')[:])
 np.save('alpha.npy',M.trace('alpha')[:])
-#
-#
-#
+np.save('rho_eL.npy',M.trace('rho_eL')[:])
+np.save('rho_mL.npy',M.trace('rho_mL')[:])
+np.save('rho_sL.npy',M.trace('rho_sL')[:])
+np.save('betaL.npy',M.trace('betaL')[:])
+np.save('alphaL.npy',M.trace('alphaL')[:])
+
+np.save('interaction_angle.npy',M.trace('interaction_angle')[:])
+np.save('interaction_length.npy',M.trace('interaction_length')[:])
+
+
+

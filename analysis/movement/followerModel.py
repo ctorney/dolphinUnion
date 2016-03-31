@@ -36,10 +36,8 @@ evector = np.load('evector.npy')
 uid = np.load('uid.npy')
 leaders = np.load('../leaders.npy')
 
-leadIndexes=np.in1d(uid,leaders)
-neighbours= neighbours[leadIndexes]
-mvector = mvector[leadIndexes]
-evector = evector[leadIndexes]
+leadIndexes=np.in1d(neighbours[:,:,2],leaders)
+neighbours[leadIndexes,0]=0
 
 
 

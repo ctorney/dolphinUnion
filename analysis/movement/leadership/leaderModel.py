@@ -14,41 +14,48 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['decay_distance','decay_network','interaction_distance','interaction_network','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
+__all__ = ['interaction_length','interaction_angle','rho_sL','rho_mL','rho_eL','alphaL','betaL','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
 
 
-interaction_network = Uniform('interaction_network', lower=0.5, upper=20.0,value=15.7419)
-interaction_distance = Uniform('interaction_distance', lower=0.5, upper=20.0,value=5.0516)
-#ignore_length = DiscreteUniform('ignore_length', lower=1, upper=3)#,value=1.0)
-decay_distance = Uniform('decay_distance', lower=0.5, upper=10.0,value=0.8812)
-decay_network = Uniform('decay_network', lower=0.5, upper=10.0,value=4.6643)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2580)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9687)
-rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9212)
-rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9549)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.2921)
-beta = Uniform('beta',lower=0, upper=1,value=0.1358)
+interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=14.2296)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2201)
+rho_sL = Uniform('rho_sL',lower=0, upper=1,value=0.9455)
+rho_mL = Uniform('rho_mL',lower=0, upper=1,value=0.9165)
+rho_eL = Uniform('rho_eL',lower=0, upper=1,value=0.9412)
+alphaL = Uniform('alphaL',lower=0, upper=1,value=0.2727)
+betaL = Uniform('betaL',lower=0, upper=1,value=0.1970)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9608)
+rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9197)
+rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9556)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.3966)
+beta = Uniform('beta',lower=0, upper=1,value=0.1280)
 # rho is tanh(a dx) * exp(-b dx)
 # the inflexion point is located at (1/2a)ln(2a/b + sqrt((2a/b)^2+1)
 
 neighbours = np.load('../neighbours.npy')
 mvector = np.load('../mvector.npy')
 evector = np.load('../evector.npy')
+uid = np.load('../uid.npy')
+leaders = np.load('../../leaders.npy')
+
+leadIndexes=np.in1d(uid,leaders)
+#neighbours= neighbours[leadIndexes]
+#mvector = mvector[leadIndexes]
+#evector = evector[leadIndexes]
+
+
+
 sin_ev = np.sin(evector)
 cos_ev = np.cos(evector)
     
 @deterministic(plot=False)
-def social_vector(iln=interaction_network, ild=interaction_distance, ded=decay_distance, den=decay_network, ia=interaction_angle):
+def social_vector(il=interaction_length, ia=interaction_angle):
         
-    distances = neighbours[:,:,0]
-    distances[(neighbours[:,:,0]==0)]=9999.0
-    networkDist = np.argsort(distances,axis=1).astype(np.float32)
-    networkDist = np.argsort(networkDist,axis=1).astype(np.float32)
-
-    n_weights = np.exp(-((networkDist/iln)**den))*((neighbours[:,:,0]/ild)*np.exp((1.0/ded)*(1.0-(neighbours[:,:,0]/ild)**ded)))#*(0.5+0.5*np.tanh(ad*(ia-np.abs(neighbours[:,:,1]))))
+    n_weights = np.ones_like(neighbours[:,:,0],dtype=np.float64)
+    n_weights[neighbours[:,:,0]==0]=0.0
+    n_weights[neighbours[:,:,0]>il]=0.0
     n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
-    n_weights[(neighbours[:,:,0]==0)]=0.0
- 
+  
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1)
     
@@ -64,18 +71,25 @@ def social_vector(iln=interaction_network, ild=interaction_distance, ded=decay_d
 
 
 @stochastic(observed=True)
-def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, value=mvector):
+def moves(socialL=rho_sL, rmL=rho_mL,reL=rho_eL,alL=alphaL, beL=betaL, social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, value=mvector):
     # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
     # and the assumed interaction function
     svv = np.arctan2(sv[:,1],sv[:,0])
-    #lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
     als = al*np.ones_like(svv)
+    als[leadIndexes]=alL
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
-    socials=social#*lens
+    bes = be*np.ones_like(svv)    
+    bes[leadIndexes]=beL
+    socials=social*np.ones_like(svv)
+    socials[leadIndexes]=socialL
+    mems=rm*np.ones_like(svv)
+    mems[leadIndexes]=rmL
+    envs=re*np.ones_like(svv)
+    envs[leadIndexes]=reL
     wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
-    wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-    wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-    wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
+    wce = (1/(2*pi)) * (1-np.power(envs,2))/(1+np.power(envs,2)-2*envs*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
+    wcm = (1/(2*pi)) * (1-np.power(mems,2))/(1+np.power(mems,2)-2*mems*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+    wcc = als*wcs + (1.0-als)*(bes*wce+(1.0-bes)*wcm)
     return np.sum(np.log(wcc))
 
 

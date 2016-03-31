@@ -73,8 +73,8 @@ FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
 #MOVIEDIR = HD + '/workspace/dolphinUnion/tracking/solo/'
 df = pd.read_csv(FILELIST)
 
-show_index =0
-outputMovie=True
+show_index =8
+outputMovie=False
 
 for index, row in df.iterrows():
     if index!=show_index:
@@ -84,7 +84,7 @@ for index, row in df.iterrows():
     noext, ext = os.path.splitext(row.filename)   
 
 
-    trackName =  TRACKDIR + '/FINAL_' + str(index) + '_' + noext + '.csv' #'/TRACKS_' + str(index) + '_' + noext + '.csv'
+    trackName =  TRACKDIR + '/RELINKED_' + str(index) + '_' + noext + '.csv' #'/TRACKS_' + str(index) + '_' + noext + '.csv'
     posName = TRACKDIR + '/CARIBOU_REAL_POS_' + str(index) + '_' + noext + '.csv'
     geoName = LOGDIR + '/GEOTAG_' + noext + '.csv'
     movieName = MOVIEDIR + row.filename
@@ -136,7 +136,8 @@ for index, row in df.iterrows():
             cv2.putText(frame ,str(int(trrow['c_id'])) ,((int(trrow['x_px'])+6, int(trrow['y_px'])-25)), cv2.FONT_HERSHEY_SIMPLEX, 0.4,(34,34,200),2)
             #cv2.rectangle(frame, ((int( trrow['x'])-sz, int( trrow['y'])-sz)),((int( trrow['x'])+sz, int( trrow['y'])+sz)),(0,0,0),2)
             #cvDrawDottedRect(frame, int( trrow['x_px']), int( trrow['y_px']),(34,34,200))
-            cvDrawDottedRect(frame, int( trrow['x_px']), int( trrow['y_px']),(0,0,0))
+            #cvDrawDottedRect(frame, int( trrow['x_px']), int( trrow['y_px']),(0,0,0))
+            cv2.circle(frame, (int(trrow['x_px']), int(trrow['y_px'])),2,(255,255,255),-1)
             
         thisFrame = posDF.ix[posDF['frame']==(tt)]
 

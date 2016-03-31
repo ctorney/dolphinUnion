@@ -14,20 +14,16 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['decay_distance','decay_network','interaction_distance','interaction_network','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
+__all__ = ['interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
 
 
-interaction_network = Uniform('interaction_network', lower=0.5, upper=20.0,value=15.7419)
-interaction_distance = Uniform('interaction_distance', lower=0.5, upper=20.0,value=5.0516)
-#ignore_length = DiscreteUniform('ignore_length', lower=1, upper=3)#,value=1.0)
-decay_distance = Uniform('decay_distance', lower=0.5, upper=10.0,value=0.8812)
-decay_network = Uniform('decay_network', lower=0.5, upper=10.0,value=4.6643)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2580)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9687)
-rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9212)
-rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9549)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.2921)
-beta = Uniform('beta',lower=0, upper=1,value=0.1358)
+interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=14.1531)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2208)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9622)
+rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9187)
+rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9524)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.3874)
+beta = Uniform('beta',lower=0, upper=1,value=0.1342)
 # rho is tanh(a dx) * exp(-b dx)
 # the inflexion point is located at (1/2a)ln(2a/b + sqrt((2a/b)^2+1)
 
@@ -38,16 +34,12 @@ sin_ev = np.sin(evector)
 cos_ev = np.cos(evector)
     
 @deterministic(plot=False)
-def social_vector(iln=interaction_network, ild=interaction_distance, ded=decay_distance, den=decay_network, ia=interaction_angle):
+def social_vector(il=interaction_length, ia=interaction_angle):
         
-    distances = neighbours[:,:,0]
-    distances[(neighbours[:,:,0]==0)]=9999.0
-    networkDist = np.argsort(distances,axis=1).astype(np.float32)
-    networkDist = np.argsort(networkDist,axis=1).astype(np.float32)
-
-    n_weights = np.exp(-((networkDist/iln)**den))*((neighbours[:,:,0]/ild)*np.exp((1.0/ded)*(1.0-(neighbours[:,:,0]/ild)**ded)))#*(0.5+0.5*np.tanh(ad*(ia-np.abs(neighbours[:,:,1]))))
+    n_weights = np.ones_like(neighbours[:,:,0],dtype=np.float64)
+    n_weights[neighbours[:,:,0]==0]=0.0
+    n_weights[neighbours[:,:,0]>il]=0.0
     n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
-    n_weights[(neighbours[:,:,0]==0)]=0.0
  
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1)
