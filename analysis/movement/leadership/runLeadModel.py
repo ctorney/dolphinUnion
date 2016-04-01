@@ -11,8 +11,8 @@ from pymc.Matplot import plot as mcplot
 M = MCMC(leaderModel)
 
 #M.use_step_method(pymc.AdaptiveMetropolis, [M.left_angle, M.right_angle, M.lag, M.dist],  delay=1000)
-M.sample(iter=20000, burn=10000, thin=10,verbose=0)
-mcplot(M)
+M.sample(iter=200000, burn=10000, thin=10,verbose=0)
+#mcplot(M)
 #from pylab import hist, show
 
 #
@@ -96,19 +96,19 @@ mcplot(M)
 #plt.plot(xx,yy,color='blue',linewidth=2)
 #plt.fill_between(xx, 0, yy, color='blue', alpha=.25)
 
-np.save('rho_e.npy',M.trace('rho_e')[:])
-np.save('rho_m.npy',M.trace('rho_m')[:])
-np.save('rho_s.npy',M.trace('rho_s')[:])
-np.save('beta.npy',M.trace('beta')[:])
-np.save('alpha.npy',M.trace('alpha')[:])
-np.save('rho_eL.npy',M.trace('rho_eL')[:])
-np.save('rho_mL.npy',M.trace('rho_mL')[:])
-np.save('rho_sL.npy',M.trace('rho_sL')[:])
-np.save('betaL.npy',M.trace('betaL')[:])
-np.save('alphaL.npy',M.trace('alphaL')[:])
+np.save('output/rho_e.npy',M.trace('rho_e')[:])
+np.save('output/rho_m.npy',M.trace('rho_m')[:])
+np.save('output/rho_s.npy',M.trace('rho_s')[:])
+np.save('output/beta.npy',M.trace('beta')[:])
+np.save('output/alpha.npy',M.trace('alpha')[:])
+np.save('output/rho_eL.npy',M.trace('rho_eL')[:])
+np.save('output/rho_mL.npy',M.trace('rho_mL')[:])
+np.save('output/rho_sL.npy',M.trace('rho_sL')[:])
+np.save('output/betaL.npy',M.trace('betaL')[:])
+np.save('output/alphaL.npy',M.trace('alphaL')[:])
 
-np.save('interaction_angle.npy',M.trace('interaction_angle')[:])
-np.save('interaction_length.npy',M.trace('interaction_length')[:])
+np.save('output/interaction_angle.npy',M.trace('interaction_angle')[:])
+np.save('output/interaction_length.npy',M.trace('interaction_length')[:])
 
 
 

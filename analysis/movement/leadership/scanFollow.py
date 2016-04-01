@@ -44,16 +44,16 @@ leaders = np.load('../../leaders.npy')
 #leaders= np.random.choice(uniID,len(leaders),replace=False)
 # find all non-leaders
 leadIndexes=(np.in1d(uid,leaders))
-neighbours= neighbours[leadIndexes]
+#neighbours= neighbours[leadIndexes]
 mvector = mvector[leadIndexes]
-evector = evector[leadIndexes]
+#evector = evector[leadIndexes]
 
 
 leadIndexes=(np.in1d(neighbours[:,:,2],leaders).reshape(neighbours[:,:,2].shape))
 lead_weights = np.zeros_like(neighbours[:,:,2],dtype=np.float64)
 lead_weights[leadIndexes]=1.0
 
-lwlist = np.arange(-0.5,10,0.1)
+lwlist = np.arange(1,3,0.1)
 probs=np.zeros(len(lwlist))
 for i in range(len(lwlist)):
     

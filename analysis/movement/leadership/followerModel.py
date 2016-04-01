@@ -14,7 +14,7 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['lead_weight','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
+__all__ = ['lead_weight','interaction_length','interaction_angle','rho_sL','rho_mL','rho_eL','alphaL','betaL','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
 
 
 interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=14.1531)
@@ -25,8 +25,11 @@ rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9187)
 rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9524)
 alpha = Uniform('alpha',lower=0, upper=1,value=0.3874)
 beta = Uniform('beta',lower=0, upper=1,value=0.1342)
-# rho is tanh(a dx) * exp(-b dx)
-# the inflexion point is located at (1/2a)ln(2a/b + sqrt((2a/b)^2+1)
+rho_sL = Uniform('rho_sL',lower=0, upper=1,value=0.9455)
+rho_mL = Uniform('rho_mL',lower=0, upper=1,value=0.9165)
+rho_eL = Uniform('rho_eL',lower=0, upper=1,value=0.9412)
+alphaL = Uniform('alphaL',lower=0, upper=1,value=0.2727)
+betaL = Uniform('betaL',lower=0, upper=1,value=0.1970)
 
 neighbours = np.load('../neighbours.npy')
 mvector = np.load('../mvector.npy')
@@ -38,14 +41,14 @@ leaders = np.load('../../leaders.npy')
 
 # find all non-leaders
 leadIndexes=(np.in1d(uid,leaders))
-neighbours= neighbours[leadIndexes]
-mvector = mvector[leadIndexes]
-evector = evector[leadIndexes]
+#neighbours= neighbours[leadIndexes]
+#mvector = mvector[leadIndexes]
+#evector = evector[leadIndexes]
 
 
-leadIndexes=np.in1d(neighbours[:,:,2],leaders).reshape(neighbours[:,:,2].shape)
+followIndexes=np.in1d(neighbours[:,:,2],leaders).reshape(neighbours[:,:,2].shape)
 lead_weights = np.zeros_like(neighbours[:,:,2],dtype=np.float64)
-lead_weights[leadIndexes]=1.0
+lead_weights[followIndexes]=1.0
 
 @deterministic(plot=False)
 def social_vector(il=interaction_length, ia=interaction_angle, lw=lead_weight):
@@ -70,18 +73,25 @@ def social_vector(il=interaction_length, ia=interaction_angle, lw=lead_weight):
 
 
 @stochastic(observed=True)
-def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, value=mvector):
+def moves(socialL=rho_sL, rmL=rho_mL,reL=rho_eL,alL=alphaL, beL=betaL, social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, value=mvector):
     # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
     # and the assumed interaction function
     svv = np.arctan2(sv[:,1],sv[:,0])
-    #lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
     als = al*np.ones_like(svv)
+    als[leadIndexes]=alL
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
-    socials=social#*lens
+    bes = be*np.ones_like(svv)    
+    bes[leadIndexes]=beL
+    socials=social*np.ones_like(svv)
+    socials[leadIndexes]=socialL
+    mems=rm*np.ones_like(svv)
+    mems[leadIndexes]=rmL
+    envs=re*np.ones_like(svv)
+    envs[leadIndexes]=reL
     wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
-    wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-    wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-    wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
+    wce = (1/(2*pi)) * (1-np.power(envs,2))/(1+np.power(envs,2)-2*envs*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
+    wcm = (1/(2*pi)) * (1-np.power(mems,2))/(1+np.power(mems,2)-2*mems*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+    wcc = als*wcs + (1.0-als)*(bes*wce+(1.0-bes)*wcm)
     return np.sum(np.log(wcc))
 
 

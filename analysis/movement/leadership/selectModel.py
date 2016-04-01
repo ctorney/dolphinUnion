@@ -6,8 +6,8 @@ import numpy as np
 
 
 import constantModel
-
 import leaderModel
+import followerModel
 import pymc
 from pymc import MAP
 from pymc.Matplot import plot as mcplot
@@ -24,3 +24,7 @@ LM.fit(method ='fmin', iterlim=100000, tol=.000001)
 print(LM.AIC)
 print(LM.BIC)
 
+FM = MAP(followerModel)
+FM.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(FM.AIC)
+print(FM.BIC)
