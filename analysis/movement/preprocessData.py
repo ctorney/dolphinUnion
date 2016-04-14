@@ -31,8 +31,8 @@ for index, row in df.iterrows():
     gridPosfilename = DATADIR + '/GRIDPOS_' + str(index) + '_' + noext + '.npy'
     posDF = pd.read_csv(posfilename) 
     posDF['clip']=index
-    posDF = posDF[posDF['frame']%120==0]
-    dt = 120 # 60 frames is 1 second
+    posDF = posDF[posDF['frame']%60==0]
+    dt = 60 # 60 frames is 1 second
     posDF['dtheta']=np.NaN
     posDF['env_heading']=np.NaN
     for index, row in posDF.iterrows():
@@ -50,9 +50,9 @@ for index, row in df.iterrows():
             excThis = posDF[posDF.c_id!=thisID]
             xp = excThis['x'].values
             yp = excThis['y'].values
-            xdirs = excThis['dx'].values
-            ydirs = excThis['dy'].values
-            kappa = 32.0*32.0
+            xdirs = np.cos(excThis['heading'].values)
+            ydirs = np.sin(excThis['heading'].values)
+            kappa = 2.0**2
             dists = (((xp - thisX)**2 + (yp - thisY)**2))
             weights = np.exp(-dists/kappa)
             xav = np.sum(weights*xdirs)/np.sum(weights)
@@ -76,7 +76,7 @@ for index, row in allDF.iterrows():
     if len(window)>maxN:
         maxN=len(window)#
 
-neighbours = np.zeros((dsize,maxN,3)).astype(np.float32) # dist, angle
+neighbours = np.zeros((dsize,maxN,4)).astype(np.float32) # dist, angle
 #pixels are rescaled to meters based on flying at a height of 100m - camera fov = 60
 px_to_m = 100*2.0*math.tan(math.radians(30))/1920.0
 
@@ -94,13 +94,17 @@ for index, row in allDF.iterrows():
         xj = w.x
         yj = w.y
         w_id = w['clip']*10000 + w['c_id']
-        neighbours[index,ncount,0] = ((((thisX-xj)**2+(thisY-yj)**2))**0.5) * px_to_m 
+        neighbours[index,ncount,0] = ((((thisX-xj)**2+(thisY-yj)**2))**0.5) #* px_to_m 
+        jAngle = w.heading
+        jAngle = jAngle - thisAngle
+        jHeading  = math.atan2(math.sin(jAngle), math.cos(jAngle))
         dx = xj - thisX
         dy = yj - thisY
         angle = math.atan2(dy,dx)
         angle = angle - thisAngle
         neighbours[index,ncount,1] = math.atan2(math.sin(angle), math.cos(angle))
         neighbours[index,ncount,2] = w_id
+        neighbours[index,ncount,3] = jHeading
         ncount+=1
 
 # convert to a numpy array
