@@ -35,6 +35,8 @@ for indexF, rowF in df.iterrows():
     dt = 60 # 60 frames is 1 second
     posDF['move1']=np.NaN
     posDF['move2']=np.NaN
+    posDF['move3']=np.NaN
+    posDF['move4']=np.NaN
     posDF['move5']=np.NaN
     posDF['move10']=np.NaN
     posDF['env_heading']=np.NaN
@@ -65,12 +67,28 @@ for indexF, rowF in df.iterrows():
             dx = nextTime.iloc[0]['x'] - thisX
             dy = nextTime.iloc[0]['y'] - thisY
             posDF.ix[index,'move1'] = math.atan2(dy,dx) -  thisTheta
+
         nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+2*dt))<1e-6)&(posDF['c_id']==thisID)]
         if len(nextTime)==1:
             # 2 second move heading
             dx = nextTime.iloc[0]['x'] - thisX
             dy = nextTime.iloc[0]['y'] - thisY
             posDF.ix[index,'move2'] = math.atan2(dy,dx) -  thisTheta
+    
+        nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+3*dt))<1e-6)&(posDF['c_id']==thisID)]
+        if len(nextTime)==1:
+            # 2 second move heading
+            dx = nextTime.iloc[0]['x'] - thisX
+            dy = nextTime.iloc[0]['y'] - thisY
+            posDF.ix[index,'move3'] = math.atan2(dy,dx) -  thisTheta
+            
+        nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+4*dt))<1e-6)&(posDF['c_id']==thisID)]
+        if len(nextTime)==1:
+            # 2 second move heading
+            dx = nextTime.iloc[0]['x'] - thisX
+            dy = nextTime.iloc[0]['y'] - thisY
+            posDF.ix[index,'move4'] = math.atan2(dy,dx) -  thisTheta
+            
         nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+5*dt))<1e-6)&(posDF['c_id']==thisID)]
         if len(nextTime)==1:
             # 5 second move heading
@@ -153,6 +171,16 @@ mvector = allDF['move2'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
 np.save('mvector2.npy', mvector)
+
+mvector = allDF['move3'].values
+mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
+mvector[mvector>pi]=mvector[mvector>pi]-2*pi
+np.save('mvector3.npy', mvector)
+
+mvector = allDF['move4'].values
+mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
+mvector[mvector>pi]=mvector[mvector>pi]-2*pi
+np.save('mvector4.npy', mvector)
 
 mvector = allDF['move5'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
