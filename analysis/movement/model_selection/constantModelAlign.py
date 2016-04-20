@@ -17,11 +17,11 @@ import matplotlib.pyplot as plt
 __all__ = ['attact_length','attract_angle','align_length','align_angle','align_weight','rho_s','rho_m','rho_e','alpha','beta','mvector','social_vector','desired_vector']
 
 
-attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=14.1531)
-align_length = Uniform('align_length', lower=0.5, upper=20.0,value=14.1531)
-attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.2208)
-align_angle = Uniform('align_angle', lower=0, upper=pi,value=0.2208)
-align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=1.0)
+attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=8)
+align_length = Uniform('align_length', lower=0.5, upper=20.0,value=3)
+attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.2)
+align_angle = Uniform('align_angle', lower=0, upper=pi,value=0.4)
+align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.7)
 rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9622)
 rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9187)
 rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9524)
@@ -29,11 +29,17 @@ alpha = Uniform('alpha',lower=0, upper=1,value=0.3874)
 beta = Uniform('beta',lower=0, upper=1,value=0.1342)
 
 neighbours = np.load('../neighbours.npy')
-mvector = np.load('../mvector.npy')
+mvector = np.load('../mvector5.npy')
 evector = np.load('../evector.npy')
-    
+evector = evector[np.isfinite(mvector)]
+neighbours = neighbours[np.isfinite(mvector)]
+mvector = mvector[np.isfinite(mvector)]
+nonnan = np.ones_like(evector)    
+nonnan[np.isnan(evector)]=0.0
+evector[np.isnan(evector)]=0.0
+
 @deterministic(plot=False)
-def social_vector(at_l=attract_length, at_a=attract_angle, al_l=align_length, al_a=align_angle, al_w=align_weight):
+def social_vector(at_l=attract_length, at_a=attract_angle, al_l=align_length, al_a=align_angle,  al_w=align_weight):
         
     n_weights = np.ones_like(neighbours[:,:,0],dtype=np.float64)
     n_weights[neighbours[:,:,0]==0]=0.0
@@ -44,7 +50,7 @@ def social_vector(at_l=attract_length, at_a=attract_angle, al_l=align_length, al
     na_weights[neighbours[:,:,0]==0]=0.0
     na_weights[neighbours[:,:,0]>al_l]=0.0
     na_weights[(neighbours[:,:,1]<-al_a)|(neighbours[:,:,1]>al_a)]=0.0
- 
+    
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1) + np.sum(np.cos(neighbours[:,:,3])*na_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1) + np.sum(np.sin(neighbours[:,:,3])*na_weights,1)
     
@@ -67,11 +73,12 @@ def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, v
     #lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
     als = al*np.ones_like(svv)
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
+    bes = be*nonnan
     socials=social#*lens
     wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
     wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
     wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-    wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
+    wcc = als*wcs + (1.0-als)*(bes*wce+(1.0-bes)*wcm)
     return np.sum(np.log(wcc))
 
 

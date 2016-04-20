@@ -6,7 +6,7 @@ import numpy as np
 
 import networkModel
 import constantModel
-
+import constantModelAlign
 import distanceModel
 import hybridModel
 import hybridModelv2
@@ -15,32 +15,50 @@ from pymc import MAP
 from pymc.Matplot import plot as mcplot
 
 
-CM = MAP(constantModel)
-CM.fit(method ='fmin', iterlim=100000, tol=.000001)
-print(CM.AIC)
-print(CM.BIC)
+#CM = MAP(constantModel)
+#CM.fit(method ='fmin', iterlim=100000, tol=.000001)
+#print(CM.AIC)
+#print(CM.BIC)
+
+CMA = MAP(constantModelAlign)
+CMA.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(CMA.AIC)
+print(CMA.BIC)
+
+print(CMA.attract_length.value)
+print(CMA.attract_angle.value)
+print(CMA.align_length.value)
+print(CMA.align_angle.value)
+print(CMA.align_weight.value)
+
+print(CMA.rho_s.value)
+print(CMA.rho_m.value) 
+print(CMA.rho_e.value) 
+print(CMA.alpha.value) 
+print(CMA.beta.value)
 
 
-DM = MAP(distanceModel)
-DM.fit(method ='fmin', iterlim=100000, tol=.000001)
-print(DM.AIC)
-print(DM.BIC)
-
-
-NM = MAP(networkModel)
-NM.fit(method ='fmin', iterlim=100000, tol=.000001)
-print(NM.AIC)
-print(NM.BIC)
-
-HM = MAP(hybridModel)
-HM.fit(method ='fmin', iterlim=100000, tol=.000001)
-print(HM.AIC)
-print(HM.BIC)
-
-HM2 = MAP(hybridModelv2)
-HM2.fit(method ='fmin', iterlim=100000, tol=.000001)
-print(HM2.AIC)
-print(HM2.BIC)
+#
+#DM = MAP(distanceModel)
+#DM.fit(method ='fmin', iterlim=100000, tol=.000001)
+#print(DM.AIC)
+#print(DM.BIC)
+#
+#
+#NM = MAP(networkModel)
+#NM.fit(method ='fmin', iterlim=100000, tol=.000001)
+#print(NM.AIC)
+#print(NM.BIC)
+#
+#HM = MAP(hybridModel)
+#HM.fit(method ='fmin', iterlim=100000, tol=.000001)
+#print(HM.AIC)
+#print(HM.BIC)
+#
+#HM2 = MAP(hybridModelv2)
+#HM2.fit(method ='fmin', iterlim=100000, tol=.000001)
+#print(HM2.AIC)
+#print(HM2.BIC)
 
 #from pylab import hist, show
 

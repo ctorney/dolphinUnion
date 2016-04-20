@@ -28,11 +28,14 @@ beta = Uniform('beta',lower=0, upper=1,value=0.1342)
 # the inflexion point is located at (1/2a)ln(2a/b + sqrt((2a/b)^2+1)
 
 neighbours = np.load('../neighbours.npy')
-mvector = np.load('../mvector.npy')
+mvector = np.load('../mvector3.npy')
 evector = np.load('../evector.npy')
-sin_ev = np.sin(evector)
-cos_ev = np.cos(evector)
-    
+evector = evector[np.isfinite(mvector)]
+neighbours = neighbours[np.isfinite(mvector)]
+mvector = mvector[np.isfinite(mvector)]
+nonnan = np.ones_like(evector)    
+nonnan[np.isnan(evector)]=0.0
+evector[np.isnan(evector)]=0.0
 @deterministic(plot=False)
 def social_vector(il=interaction_length, ia=interaction_angle):
         
@@ -63,11 +66,12 @@ def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, v
     #lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
     als = al*np.ones_like(svv)
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
+    bes = be*nonnan
     socials=social#*lens
     wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
     wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
     wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-    wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
+    wcc = als*wcs + (1.0-als)*(bes*wce+(1.0-bes)*wcm)
     return np.sum(np.log(wcc))
 
 
