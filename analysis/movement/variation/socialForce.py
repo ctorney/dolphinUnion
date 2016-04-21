@@ -15,16 +15,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-at_l = 8.543706399430775
-at_a=0.1981991683183868
-al_l=2.786165151495565
-al_a=0.41132367012957816
-al_w=0.719445094861646
-social=0.9679783684078092
-rm=0.9182859451906178
-re=0.9207242019320199
-al=0.40091298510428786
-be=0.13242601151232752
+at_l =8.1949901467068
+at_a=0.199171863411916
+al_l=3.07874119229163
+al_a=0.408350512048466
+al_w=0.716703369139833
+social=0.969100500071044
+rm=0.910446683807612
+re=0.963595135578525
+al=0.400422492125391
+be=0.124447947248256
+
 
 
 
@@ -67,14 +68,18 @@ svv = np.arctan2(sv[:,1],sv[:,0])
 #lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
 als = al*np.ones_like(svv)
 als[(sv[:,1]==0)&(sv[:,0]==0)]=0
+#svv = svv[(sv[:,1]!=0)|(sv[:,0]!=0)]
+#mvector = mvector[(sv[:,1]!=0)|(sv[:,0]!=0)]
+#evector = evector[(sv[:,1]!=0)|(sv[:,0]!=0)]
+#uid = uid[(sv[:,1]!=0)|(sv[:,0]!=0)]
 bes = be*nonnan
 socials=social#*lens
 wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
 wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
 wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-wcc = als*wcs + (1.0-als)*(bes*wce+(1.0-bes)*wcm)
+wcc = al*wcs + (1.0-al)*(be*wce+(1.0-be)*wcm)
 
-wcc2 = (bes*wce+(1.0-bes)*wcm)
+wcc2 = (be*wce+(1.0-be)*wcm)
 
 #social force is how much do we reduce uncertainty if we include the social vector
 sf = np.log(wcc) - np.log(wcc2)
@@ -92,8 +97,8 @@ for i,thisID in enumerate(inds):
 x=np.argsort(means)
 means = means[x]
 stddevs = stddevs[x]
-stddevs=stddevs[means!=0]
-means=means[means!=0]
+#stddevs=stddevs[means!=0]
+#means=means[means!=0]
 
 plt.plot(means,'r')
 plt.plot(means+stddevs,'b')
