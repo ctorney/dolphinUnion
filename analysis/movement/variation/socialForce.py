@@ -31,7 +31,9 @@ be=0.13242601151232752
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector2.npy')
 evector = np.load('../pdata/evector.npy')
+uid = np.load('../pdata/uid.npy')
 evector = evector[np.isfinite(mvector)]
+uid = uid[np.isfinite(mvector)]
 neighbours = neighbours[np.isfinite(mvector)]
 mvector = mvector[np.isfinite(mvector)]
 nonnan = np.ones_like(evector)    
@@ -78,3 +80,21 @@ wcc2 = (bes*wce+(1.0-bes)*wcm)
 sf = np.log(wcc) - np.log(wcc2)
 
 
+inds = np.unique(uid)
+means = np.empty_like(inds)
+stddevs = np.empty_like(inds)
+
+for i,thisID in enumerate(inds):
+    thisSocial=sf[uid==thisID]
+    means[i]=np.mean(thisSocial)
+    stddevs[i]=np.std(thisSocial)/sqrt(len(thisSocial))
+
+x=np.argsort(means)
+means = means[x]
+stddevs = stddevs[x]
+stddevs=stddevs[means!=0]
+means=means[means!=0]
+
+plt.plot(means,'r')
+plt.plot(means+stddevs,'b')
+plt.plot(means-stddevs,'b')
