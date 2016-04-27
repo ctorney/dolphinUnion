@@ -4,6 +4,7 @@ import pandas as pd
 import os, re
 import math
 import time
+import csv
 from scipy import interpolate
 from scipy import ndimage
 import matplotlib.pyplot as plt
@@ -25,9 +26,25 @@ for index, row in df.groupby('filename'):
     noext, ext = os.path.splitext(row.filename.iloc[0])   
     geoName = LOGDIR + '/GEOTAG_' + noext + '.csv'
     print(geoName)
+    tlogName = LOGDIR + '/LOG_' + noext + '.csv'
     
+    
+    # open the file read in all the data and record the timestamp, recording start, recording stop
+    csvfile = open(tlogName, 'r') 
+    rowreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+    for logrow in rowreader:
+            
+        if logrow[1]=='GLOBAL_POSITION_INT':
+            # POSITION, HEIGHT, HEADING ETC from the autopilot - values are corrected 
+            if int(logrow[11])>500:
+                startLat = int(logrow[5])
+                startLon = int(logrow[7])
+
     geoDF = pd.read_csv(geoName,index_col=0) 
-    
+    gmapData = gmaps.elevation((startLat/10000000.0,startLon/10000000))
+    startE = gmapData[0]['elevation']
+
+    break
 #    ESL = np.empty(len(geoDF))
 #    for g_index, g_row in geoDF.iterrows(): 
 #        print(g_index)
