@@ -31,7 +31,7 @@ for indexF, rowF in df.iterrows():
     gridPosfilename = DATADIR + '/GRIDPOS_' + str(indexF) + '_' + noext + '.npy'
     posDF = pd.read_csv(posfilename) 
     posDF['clip']=indexF
-    posDF = posDF[posDF['frame']%60==0]
+    posDF = posDF[posDF['frame']%120==0]
     dt = 60 # 60 frames is 1 second
     posDF['move1']=np.NaN
     posDF['move2']=np.NaN
@@ -109,7 +109,7 @@ for indexF, rowF in df.iterrows():
     allDF = allDF.append(posDF,ignore_index=True)
 
     
-allDF = allDF[np.isfinite(allDF['move1'])]
+allDF = allDF[np.isfinite(allDF['move2'])]
 allDF = allDF.reset_index(drop=True)
 dsize = len(allDF)
 maxN=0
@@ -158,44 +158,44 @@ allData = allDF.values
 
 uid = allDF['clip'].values*10000 + allDF['c_id'].values 
 
-np.save('neighbours.npy', neighbours)
-np.save('uid.npy', uid)
+np.save('pdata/neighbours.npy', neighbours)
+np.save('pdata/uid.npy', uid)
 
 
 mvector = allDF['move1'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('mvector1.npy', mvector)
+np.save('pdata/mvector1.npy', mvector)
 
 mvector = allDF['move2'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('mvector2.npy', mvector)
+np.save('pdata/mvector2.npy', mvector)
 
 mvector = allDF['move3'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('mvector3.npy', mvector)
+np.save('pdata/mvector3.npy', mvector)
 
 mvector = allDF['move4'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('mvector4.npy', mvector)
+np.save('pdata/mvector4.npy', mvector)
 
 mvector = allDF['move5'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('mvector5.npy', mvector)
+np.save('pdata/mvector5.npy', mvector)
 
 mvector = allDF['move10'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('mvector10.npy', mvector)
+np.save('pdata/mvector10.npy', mvector)
 
 
 evector = allDF['env_heading'].values
 evector[evector<-pi]=evector[evector<-pi]+2*pi
 evector[evector>pi]=evector[evector>pi]-2*pi
-np.save('evector.npy', evector)
+np.save('pdata/evector.npy', evector)
     
 
