@@ -28,9 +28,9 @@ rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9524)
 alpha = Uniform('alpha',lower=0, upper=1,value=0.3874)
 beta = Uniform('beta',lower=0, upper=1,value=0.1342)
 
-neighbours = np.load('../neighbours.npy')
-mvector = np.load('../mvector5.npy')
-evector = np.load('../evector.npy')
+neighbours = np.load('../pdata/neighbours.npy')
+mvector = np.load('../pdata/mvector2.npy')
+evector = np.load('../pdata/evector.npy')
 evector = evector[np.isfinite(mvector)]
 neighbours = neighbours[np.isfinite(mvector)]
 mvector = mvector[np.isfinite(mvector)]

@@ -4,12 +4,12 @@
 from matplotlib import pylab as plt
 import numpy as np
 
-import networkModel
-import constantModel
+#import networkModel
+#import constantModel
 import constantModelAlign
-import distanceModel
-import hybridModel
-import hybridModelv2
+#import distanceModel
+#import hybridModel
+#import hybridModelv2
 import pymc
 from pymc import MAP
 from pymc.Matplot import plot as mcplot
