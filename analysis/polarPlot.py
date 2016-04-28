@@ -66,14 +66,14 @@ for thisRow in range(rowCount):
         xj = w[1]
         yj = w[2]
         jAngle = (w[5])
-        r = ((((thisX-xj)**2+(thisY-yj)**2))**0.5) * px_to_m ## BL is 32 pixels
+        r = ((((thisX-xj)**2+(thisY-yj)**2))**0.5) #* px_to_m ## BL is 32 pixels
         dx = xj - thisX
         dy = yj - thisY
         angle = math.atan2(dy,dx)
         angle = angle - thisAngle
         jAngle = jAngle - thisAngle
-        axj=w[6] # accelaration in x-direction
-        ayj=w[7] # accelaration in y-direction
+        axj=w[8] # accelaration in x-direction
+        ayj=w[9] # accelaration in y-direction
         accangle = math.atan2(ayj,axj)
         acclength = (ayj**2+axj**2)**0.5
         accangle = accangle - thisAngle
@@ -103,14 +103,16 @@ locations[locations[:,1]<0,1] = locations[locations[:,1]<0,1] + 2 *pi
 
 hista2=np.histogram2d(x=locations[:,0],y=locations[:,1],bins=[r2,theta2],normed=1)[0]  
 
-hista2 =hista2/areas
-
+hista2 = 100*hista2/areas
+#probability per unit area x10-3
 size = 8
 # make a square figure
 
-fig1=plt.figure(figsize=(8,8))
+fig1=plt.figure(figsize=(6,6))
 ax2=plt.subplot(projection="polar",frameon=False)
-im=ax2.pcolormesh(theta2,r2,hista2,lw=0.0,vmin=np.min(hista2),vmax=np.max(hista2),cmap='viridis')
+im=ax2.pcolormesh(theta2,r2,hista2,lw=0.0,vmin=0,vmax=1.0,cmap='viridis')
+#np.min(hista2)
+np.max(hista2)
 ax2.yaxis.set_visible(False)
 
 # angle lines
@@ -121,7 +123,7 @@ ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '', '',  '', 'bac
 #colourbar
 position=fig1.add_axes([1.1,0.12,0.04,0.8])
 cbar=plt.colorbar(im,cax=position) 
-cbar.set_label('Neighbour density', rotation=90,fontsize='xx-large',labelpad=15)      
+cbar.set_label('Neighbour density (x0.01)', rotation=90,fontsize='x-large',labelpad=15)      
 
 #body length legend - draws the ticks and 
 axes=ax2            
@@ -149,10 +151,10 @@ for ii in xrange(len(r_ticks)):
     axes.text(theta_ticks[ii], r_ticks[ii], "%.0f" % r_tick_labels[ii], ha="right", va="center", clip_on=False, transform=trans_ticklabels)
 
 # plot the 'axis label'
-axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='xx-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
+axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='x-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
 
 
-fig1.savefig("densityHM.png",bbox_inches='tight',dpi=100)
+fig1.savefig("densityHM.tiff",bbox_inches='tight',dpi=200)
 # plot the 'spine'
 
 
@@ -171,9 +173,10 @@ relativeAngles = np.arctan2(histsin,histcos)
 stdRelativeAngles = np.sqrt( 1 - np.sqrt(histcos**2+histsin**2))
 
 
-fig1=plt.figure(figsize=(8,8))
+fig1=plt.figure(figsize=(6,6))
 ax2=plt.subplot(projection="polar",frameon=False)
-im=ax2.pcolormesh(theta2,r2,stdRelativeAngles,lw=0.0,vmin=np.min(stdRelativeAngles),vmax=np.max(stdRelativeAngles),cmap='viridis_r')
+im=ax2.pcolormesh(theta2,r2,stdRelativeAngles,lw=0.0,vmin=np.min(stdRelativeAngles),vmax=np.max(stdRelativeAngles),cmap='viridis')
+#im=ax2.pcolormesh(theta2,r2,stdRelativeAngles,lw=0.0,vmin=0,vmax=0.8,cmap='viridis_r')
 ax2.yaxis.set_visible(False)
 
 # angle lines
@@ -184,7 +187,7 @@ ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '', '',  '', 'bac
 #colourbar
 position=fig1.add_axes([1.1,0.12,0.04,0.8])
 cbar=plt.colorbar(im,cax=position) 
-cbar.set_label('Circular variance', rotation=90,fontsize='xx-large',labelpad=15)      
+cbar.set_label('Circular variance', rotation=90,fontsize='x-large',labelpad=15)      
 
 #body length legend - draws the ticks and 
 axes=ax2            
@@ -212,10 +215,10 @@ for ii in xrange(len(r_ticks)):
     axes.text(theta_ticks[ii], r_ticks[ii], "%.0f" % r_tick_labels[ii], ha="right", va="center", clip_on=False, transform=trans_ticklabels)
 
 # plot the 'axis label'
-axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='xx-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
+axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='x-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
 
 
-fig1.savefig("order.png",bbox_inches='tight',dpi=100)
+fig1.savefig("order.tiff",bbox_inches='tight',dpi=200)
 
 
 ## POLAR PLOT OF ATTRACTION
@@ -230,7 +233,7 @@ angles = 0.5*(theta2[0:-1]+theta2[1:])
 angles=np.tile(angles,(binn2,1))
 
 toOrigin = -(histcos*np.cos(angles) + histsin*np.sin(angles))
-fig1=plt.figure(figsize=(8,8))
+fig1=plt.figure(figsize=(6,6))
 ax2=plt.subplot(projection="polar",frameon=False)
 im=ax2.pcolormesh(theta2,r2,toOrigin,lw=0.0,vmin=np.min(toOrigin),vmax=np.max(toOrigin),cmap='viridis')
 ax2.yaxis.set_visible(False)
@@ -243,7 +246,7 @@ ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '', '',  '', 'bac
 #colourbar
 position=fig1.add_axes([1.1,0.12,0.04,0.8])
 cbar=plt.colorbar(im,cax=position) 
-cbar.set_label('Attraction', rotation=90,fontsize='xx-large',labelpad=15)      
+cbar.set_label('Attraction', rotation=90,fontsize='x-large',labelpad=15)      
 
 #body length legend - draws the ticks and 
 axes=ax2            
@@ -271,16 +274,16 @@ for ii in xrange(len(r_ticks)):
     axes.text(theta_ticks[ii], r_ticks[ii], "%.0f" % r_tick_labels[ii], ha="right", va="center", clip_on=False, transform=trans_ticklabels)
 
 # plot the 'axis label'
-axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='xx-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
+axes.text(theta_axlabel, r_axlabel, 'metres',rotation='vertical', fontsize='x-large', ha='right', va='center', clip_on=False, transform=trans_axlabel)#             family='Trebuchet MS')
 
 
-fig1.savefig("toOrigin.png",bbox_inches='tight',dpi=100)
-#
+fig1.savefig("toOrigin.tiff",bbox_inches='tight',dpi=200)
+
 ### POLAR PLOT OF ATTRACTION FORCE
 #
 #
-#relAccX = np.cos(locations[:,4])*locations[:,5]
-#relAccY = np.sin(locations[:,4])*locations[:,5]
+#relAccX = np.cos(locations[:,3])*locations[:,4]
+#relAccY = np.sin(locations[:,3])*locations[:,4]
 #
 #
 ## find the average cos and sin of the relative headings to calculate circular statistics
