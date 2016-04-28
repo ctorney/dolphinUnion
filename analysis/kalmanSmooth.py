@@ -49,7 +49,7 @@ for index, row in df.iterrows():
     
 
     # calculate the pixels to metre conversion by using the altitude, fov of camera, and width of frame    
-    alt = float(geoDF['alt'][fStart])/1000.0
+    alt = float(geoDF['dtg'][fStart])#/1000.0
     px_to_m = alt*2.0*math.tan(math.radians(30))/1920.0
     posDF = pd.read_csv(posfilename) 
     #break
