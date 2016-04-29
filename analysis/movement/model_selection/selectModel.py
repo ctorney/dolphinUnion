@@ -4,7 +4,8 @@
 from matplotlib import pylab as plt
 import numpy as np
 
-#import networkModel
+import corRandomWalk
+import environment
 #import constantModel
 import constantModelAlign
 #import distanceModel
@@ -14,12 +15,29 @@ import pymc
 from pymc import MAP
 from pymc.Matplot import plot as mcplot
 
+CRW = MAP(corRandomWalk)
+CRW.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(CRW.AIC)
+print(CRW.BIC)
 
-#CM = MAP(constantModel)
-#CM.fit(method ='fmin', iterlim=100000, tol=.000001)
-#print(CM.AIC)
-#print(CM.BIC)
+print(CRW.rho_m.value) 
 
+
+E = MAP(environment)
+E.fit(method ='fmin', iterlim=100000, tol=.000001)
+print(E.AIC)
+print(E.BIC)
+
+print(E.rho_m.value) 
+print(E.rho_e.value) 
+print(E.beta.value)
+
+
+##CM = MAP(constantModel)
+##CM.fit(method ='fmin', iterlim=100000, tol=.000001)
+##print(CM.AIC)
+##print(CM.BIC)
+#
 CMA = MAP(constantModelAlign)
 CMA.fit(method ='fmin', iterlim=100000, tol=.000001)
 print(CMA.AIC)

@@ -29,7 +29,7 @@ alpha = Uniform('alpha',lower=0, upper=1,value=0.3874)
 beta = Uniform('beta',lower=0, upper=1,value=0.1342)
 
 neighbours = np.load('../pdata/neighbours.npy')
-mvector = np.load('../pdata/mvector2.npy')
+mvector = np.load('../pdata/mvector.npy')
 evector = np.load('../pdata/evector.npy')
 evector = evector[np.isfinite(mvector)]
 neighbours = neighbours[np.isfinite(mvector)]
@@ -54,9 +54,7 @@ def social_vector(at_l=attract_length, at_a=attract_angle, al_l=align_length, al
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1) + np.sum(np.cos(neighbours[:,:,3])*na_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1) + np.sum(np.sin(neighbours[:,:,3])*na_weights,1)
     
-    lens = np.sqrt(xsv**2+ysv**2)
-    ysv[lens>1]=ysv[lens>1]/lens[lens>1]
-    xsv[lens>1]=xsv[lens>1]/lens[lens>1]
+   
     out = np.empty((len(mvector),2))
 
     out[:,0] = xsv
