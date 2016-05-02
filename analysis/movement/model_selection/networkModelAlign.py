@@ -13,11 +13,12 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['netcount','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['netcount','align_weight','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
 interaction_length = Uniform('interaction_length', lower=0, upper=20)
 interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2)
+align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.7)
 rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9524)
 rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9236)
 rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9554)
@@ -32,7 +33,7 @@ evector = np.load('../pdata/evector.npy')
 netcount=0
     
 @deterministic(plot=False)
-def social_vector(il=interaction_length, ia=interaction_angle):
+def social_vector(il=interaction_length, ia=interaction_angle, al_w=align_weight):
         
     distances = neighbours[:,:,0]
     distances[(neighbours[:,:,0]==0)]=9999.0
@@ -44,6 +45,16 @@ def social_vector(il=interaction_length, ia=interaction_angle):
     n_weights[(networkDist)>=netcount]=0.0
     n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
     n_weights[(neighbours[:,:,0]==0)]=0.0
+
+    na_weights = al_w*np.ones_like(neighbours[:,:,0],dtype=np.float64)
+    na_weights[(networkDist)>=netcount]=0.0
+    na_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
+    na_weights[neighbours[:,:,0]==0]=0.0
+    
+    xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1) + np.sum(np.cos(neighbours[:,:,3])*na_weights,1)
+    ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1) + np.sum(np.sin(neighbours[:,:,3])*na_weights,1)
+    
+   
  
     xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1)
     ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1)

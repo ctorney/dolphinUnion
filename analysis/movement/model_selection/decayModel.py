@@ -13,35 +13,27 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['netcount','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['decay_exponent','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
-interaction_length = Uniform('interaction_length', lower=0, upper=20)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9524)
-rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9236)
-rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9554)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.4)
-beta = Uniform('beta',lower=0, upper=1,value=0.1569)
+interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=5.1245)
+decay_exponent = Uniform('decay_exponent', lower=0.5, upper=50.0,value=0.9369)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2579)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9681)
+rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9212)
+rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9550)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.2933)
+beta = Uniform('beta',lower=0, upper=1,value=0.1359)
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
 evector = np.load('../pdata/evector.npy')
 
-
-netcount=0
     
 @deterministic(plot=False)
-def social_vector(il=interaction_length, ia=interaction_angle):
-        
-    distances = neighbours[:,:,0]
-    distances[(neighbours[:,:,0]==0)]=9999.0
-    distances[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=9999.0
-    networkDist = np.argsort(distances,axis=1).astype(np.float32)
-    networkDist = np.argsort(networkDist,axis=1).astype(np.float32)
+def social_vector(il=interaction_length, de=decay_exponent, ia=interaction_angle):
+    n_weights = np.exp(-(neighbours[:,:,0]/il)**de)
 
-    n_weights = np.ones_like(neighbours[:,:,0],dtype=np.float64)
-    n_weights[(networkDist)>=netcount]=0.0
     n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
     n_weights[(neighbours[:,:,0]==0)]=0.0
  
@@ -54,7 +46,6 @@ def social_vector(il=interaction_length, ia=interaction_angle):
     out[:,1] = ysv
     
     return out
-
 
 
 @stochastic(observed=True)
@@ -71,3 +62,4 @@ def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, v
     wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
     wcc = wcc[wcc>0]
     return np.sum(np.log(wcc))
+

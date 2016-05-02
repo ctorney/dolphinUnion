@@ -13,10 +13,10 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['netcount','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
-interaction_length = Uniform('interaction_length', lower=0, upper=20)
+interaction_length = DiscreteUniform('interaction_length', lower=0, upper=20)
 interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2)
 rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9524)
 rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9236)
@@ -41,7 +41,7 @@ def social_vector(il=interaction_length, ia=interaction_angle):
     networkDist = np.argsort(networkDist,axis=1).astype(np.float32)
 
     n_weights = np.ones_like(neighbours[:,:,0],dtype=np.float64)
-    n_weights[(networkDist)>=netcount]=0.0
+    n_weights[(networkDist)>=il]=0.0
     n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
     n_weights[(neighbours[:,:,0]==0)]=0.0
  

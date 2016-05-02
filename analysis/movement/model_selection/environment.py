@@ -8,7 +8,6 @@ from pymc import *
 from numpy import array, empty
 from numpy.random import randint, rand
 
-import pandas as pd
 from pymc.Matplot import plot as mcplot
 import matplotlib
 import numpy as np
@@ -27,9 +26,6 @@ mvector = np.load('../pdata/mvector.npy')
 evector = np.load('../pdata/evector.npy')
 evector = evector[np.isfinite(mvector)]
 mvector = mvector[np.isfinite(mvector)]
-nonnan = np.ones_like(evector)    
-nonnan[np.isnan(evector)]=0.0
-evector[np.isnan(evector)]=0.0
 
 
 
@@ -37,11 +33,10 @@ evector[np.isnan(evector)]=0.0
 @stochastic(observed=True)
 def moves(rm=rho_m, re=rho_e, be=beta, value=mvector):
     
-    bes = be*nonnan
-    
     wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
     wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-    wcc = (bes*wce+(1.0-bes)*wcm)
+    wcc = (be*wce+(1.0-be)*wcm)
+    wcc = wcc[wcc>0]
     return np.sum(np.log(wcc))
 
 
