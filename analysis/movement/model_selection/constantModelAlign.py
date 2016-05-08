@@ -16,16 +16,18 @@ import matplotlib.pyplot as plt
 __all__ = ['attact_length','attract_angle','align_length','align_angle','align_weight','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
-attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=8)
-align_length = Uniform('align_length', lower=0.5, upper=20.0,value=3)
-attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.2)
-align_angle = Uniform('align_angle', lower=0, upper=pi,value=0.4)
-align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.7)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9622)
-rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9187)
-rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9524)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.3874)
-beta = Uniform('beta',lower=0, upper=1,value=0.1342)
+attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=8.4077668)
+align_length = Uniform('align_length', lower=0.5, upper=20.0,value=2.7530568)
+attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.20212)
+align_angle = Uniform('align_angle', lower=0, upper=pi,value=0.40682)
+align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.68941107)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.967754)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.404474)
+
+rho_m = 0.92#Uniform('rho_m',lower=0, upper=1,value=0.9181)
+rho_e = 0.93#Uniform('rho_e',lower=0, upper=1,value=0.9178)
+beta = 0.136#Uniform('beta',lower=0, upper=1,value=0.136)
+
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
@@ -57,7 +59,10 @@ def social_vector(at_l=attract_length, at_a=attract_angle, al_l=align_length, al
 
 
 @stochastic(observed=True)
-def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, value=mvector):
+def moves(social=rho_s, al=alpha, sv=social_vector, value=mvector):
+    rm=rho_m
+    re=rho_e
+    be=beta
     # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
     # and the assumed interaction function
     svv = np.arctan2(sv[:,1],sv[:,0])
