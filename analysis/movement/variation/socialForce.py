@@ -65,38 +65,36 @@ svv = np.arctan2(sv[:,1],sv[:,0])
 #lens = np.sqrt(sv[:,1]**2+sv[:,0]**2)
 als = al*np.ones_like(svv)
 als[(sv[:,1]==0)&(sv[:,0]==0)]=0
-svv = svv[(sv[:,1]!=0)|(sv[:,0]!=0)]
-mvector = mvector[(sv[:,1]!=0)|(sv[:,0]!=0)]
-evector = evector[(sv[:,1]!=0)|(sv[:,0]!=0)]
-uid = uid[(sv[:,1]!=0)|(sv[:,0]!=0)]
+#svv = svv[(sv[:,1]!=0)|(sv[:,0]!=0)]
+#mvector = mvector[(sv[:,1]!=0)|(sv[:,0]!=0)]
+#evector = evector[(sv[:,1]!=0)|(sv[:,0]!=0)]
+#uid = uid[(sv[:,1]!=0)|(sv[:,0]!=0)]
 
 socials=social#*lens
 wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
 wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
 wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-wcc = al*wcs + (1.0-al)*(be*wce+(1.0-be)*wcm)
+wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
 
-wcc2 = (be*wce+(1.0-be)*wcm)
 
-#social force is how much do we reduce uncertainty if we include the social vector
-sf = np.log(wcc) - np.log(wcc2)
+
+asocwcc = (be*wce+(1.0-be)*wcm)
+
 
 
 wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((0))) # weighted wrapped cauchy
-wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-wcc = al*wcs + (1.0-al)*(be*wce+(1.0-be)*wcm)
+maxswcc = al*wcs + (1.0-al)*(be*wce+(1.0-be)*wcm)
 
-wcc2 = (be*wce+(1.0-be)*wcm)
+wcs = (1/(2*pi)) * (1-np.power(socials,2))/(1+np.power(socials,2)-2*socials*np.cos((-pi))) # weighted wrapped cauchy
+minswcc = al*wcs + (1.0-al)*(be*wce+(1.0-be)*wcm)
 
 
-maxSF = np.log(wcc) - np.log(wcc2)
-wcs=0
+#social force is how much do we reduce uncertainty if we include the social vector
+sf = np.log(wcc) - np.log(asocwcc)
+maxSF = np.log(maxswcc) - np.log(asocwcc)
+minSF = np.log(minswcc) - np.log(asocwcc)
 
-wcc = al*wcs + (1.0-al)*(be*wce+(1.0-be)*wcm)
-minSF = np.log(wcc) - np.log(wcc2)
-
-sf = (sf-minSF)/(maxSF-minSF)
+#sf = (sf-minSF)/(maxSF-minSF)
 
 inds = np.unique(uid)
 means = np.zeros_like(inds)
@@ -109,7 +107,7 @@ for i,thisID in enumerate(inds):
  #   if len(thisSocial)<2:
  #       continue
     #print(len(thisSocial))
-    means[i]=np.mean(thisSocial)
+    means[i]=np.mean(thisSocial[thisSocial!=0])
     stddevs[i]=np.std(thisSocial)/sqrt(len(thisSocial))
 
 x=np.argsort(means)
@@ -126,8 +124,10 @@ for i,thisID in enumerate(inds):
     thisSocial=sf[uid==thisID]
     #if len(thisSocial)<5:
     #    continue
-    IDlist = np.ones_like(thisSocial)*ii
-    sfSORT = np.hstack((sfSORT,thisSocial))
+    if np.isnan(means[i]):
+        continue
+    IDlist = np.ones_like(thisSocial[thisSocial!=0])*ii
+    sfSORT = np.hstack((sfSORT,thisSocial[thisSocial!=0]))
     iSORT = np.hstack((iSORT,IDlist))
     ii = ii + 1
 
@@ -136,15 +136,23 @@ plt.plot(means,'r')
 #plt.plot(means+stddevs,'b')
 #plt.plot(means-stddevs,'b')
 #plt.figure()
-#plt.plot(iSORT,sfSORT,'.')
-[counts,_,_] = np.histogram2d(sfSORT,iSORT,bins=73)
-#counts = counts/np.sum(counts,0)
-#plt.figure()
-#plt.pcolormesh(counts,vmin=0,vmax=5,cmap='bone')#,lw=0.0,vmin=np.min(hista2),vmax=np.max(hista2),cmap='viridis')
-uid = np.load('../pdata/uid.npy')
+plt.plot(iSORT,sfSORT,'.')
 empties = np.zeros_like(inds)
 for i,thisID in enumerate(inds):
+    if np.isnan(means[i]):
+        continue
     thisSocial=sv[uid==thisID]
     empties[i]=len(thisSocial[(thisSocial[:,1]==0)&(thisSocial[:,0]==0)])/len(thisSocial)
-    
+empties = empties[np.isfinite(means)]
 plt.plot(empties,'.')
+
+
+
+[counts,_,_] = np.histogram2d(sfSORT,iSORT,bins=40)
+counts = counts/np.sum(counts,0)
+plt.figure()
+plt.pcolormesh(counts,vmin=0,vmax=0.15,cmap='bone')#,lw=0.0,vmin=np.min(hista2),vmax=np.max(hista2),cmap='viridis')
+uid = np.load('../pdata/uid.npy')
+
+
+
