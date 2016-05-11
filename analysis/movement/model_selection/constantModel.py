@@ -14,26 +14,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-__all__ = ['interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['ignore_length','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.0)
 interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=14.3311)
 interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.202)
 rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9627)
 alpha = Uniform('alpha',lower=0, upper=1,value=0.364)
-rho_m = 0.92#Uniform('rho_m',lower=0, upper=1,value=0.9181)
-rho_e = 0.93#Uniform('rho_e',lower=0, upper=1,value=0.9178)
-beta = 0.136#Uniform('beta',lower=0, upper=1,value=0.136)
+rho_m = 0.921#Uniform('rho_m',lower=0, upper=1,value=0.9181)
+rho_e = 0.930#Uniform('rho_e',lower=0, upper=1,value=0.9178)
+beta = 0.135#Uniform('beta',lower=0, upper=1,value=0.136)
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
 evector = np.load('../pdata/evector.npy')
 
 @deterministic(plot=False)
-def social_vector(il=interaction_length, ia=interaction_angle):
+def social_vector(il=interaction_length, ia=interaction_angle, ig=ignore_length):
         
     n_weights = np.ones_like(neighbours[:,:,0],dtype=np.float64)
-    n_weights[neighbours[:,:,0]==0]=0.0
+ #   n_weights[neighbours[:,:,0]==0]=0.0
+    n_weights[neighbours[:,:,0]<=ig]=0.0
     n_weights[neighbours[:,:,0]>il]=0.0
     n_weights[(neighbours[:,:,1]<-ia)|(neighbours[:,:,1]>ia)]=0.0
  
