@@ -27,7 +27,7 @@ observation_matrix = [[1,0,0,0,0,0], [0,1,0,0,0,0]]
 
 # low noise on transitions
 transition_covariance = np.eye(6)*1e-3
-observation_covariance_m = np.eye(2)*2
+observation_covariance_m = np.eye(2)*3
 
 kf = KalmanFilter(transition_matrices = transition_matrix, observation_matrices = observation_matrix, transition_covariance=transition_covariance,observation_covariance=observation_covariance_m)
 
@@ -58,14 +58,34 @@ for index, row in df.iterrows():
    
     for cnum, cpos2 in posDF.groupby('c_id'):
         cpos = cpos2.groupby(['frame','c_id'],as_index=False).agg(np.mean)
-        obs = np.vstack((cpos['x'].values*px_to_m, cpos['y'].values*px_to_m)).T
+        ft = np.arange(cpos['frame'].values[0],cpos['frame'].values[-1]+1,6)
+        # label half of the observations as missing
+        obs = np.zeros((len(ft),2))
+        #xmes=np.zeros_like(ft)
+        #ymes=np.zeros_like(ft)
+        obs = np.ma.array(obs, mask=np.zeros_like(obs))
+        #xobs = np.ma.array(xmes, mask=np.zeros_like(xmes))
+        #yobs = np.ma.array(ymes, mask=np.zeros_like(ymes))
+        #xobs = np.ma.empty_like(ft)
+        #yobs = np.ma.empty_like(ft)
+        for f in range(len(ft)):
+            if len(cpos[cpos['frame']==ft[f]].x.values)>0:
+                obs[f][0]=cpos[cpos['frame']==ft[f]].x.values[0]*px_to_m
+                obs[f][1]=cpos[cpos['frame']==ft[f]].y.values[0]*px_to_m
+            else:
+                obs[f]=np.ma.masked
+                #yobs[f]=np.ma.masked
+        #if cnum==49:    
+        #    break
+        #obs = np.vstack((cpos['x'].values*px_to_m, cpos['y'].values*px_to_m)).T
+        #obs=np.vstack((xobs,yobs)).T
         #obs = np.vstack((cpos['x'].values, cpos['y'].values)).T
         kf.initial_state_mean=[cpos['x'].values[0]*px_to_m,cpos['y'].values[0]*px_to_m,0,0,0,0]
         #kf.initial_state_mean=[cpos['x'].values[0],cpos['y'].values[0],0,0,0,0]
 
         sse = kf.smooth(obs)[0]
 
-        ft = cpos['frame'].values
+        
         xSmooth = sse[:,0]
         ySmooth = sse[:,1]
         xv = sse[:,2]/0.1
