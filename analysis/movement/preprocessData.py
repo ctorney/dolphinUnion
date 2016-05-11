@@ -65,6 +65,8 @@ for indexF, rowF in df.iterrows():
             # 1 second move heading
             dx = nextTime.iloc[0]['x'] - thisX
             dy = nextTime.iloc[0]['y'] - thisY
+            posDF.ix[index,'dx']=dx
+            posDF.ix[index,'dy']=dy
             posDF.ix[index,'move'] = math.atan2(dy,dx) -  thisTheta
 
             
@@ -85,7 +87,7 @@ for index, row in allDF.iterrows():
     if len(window)>maxN:
         maxN=len(window)#
 
-neighbours = np.zeros((dsize,maxN,4)).astype(np.float32) # dist, angle
+neighbours = np.zeros((dsize,maxN,5)).astype(np.float32) # dist, angle
 #pixels are rescaled to meters based on flying at a height of 100m - camera fov = 60
 px_to_m = 100*2.0*math.tan(math.radians(30))/1920.0
 
@@ -102,18 +104,23 @@ for index, row in allDF.iterrows():
     for i2, w in window.iterrows():
         xj = w.x
         yj = w.y
-        w_id = w['clip']*10000 + w['c_id']
-        neighbours[index,ncount,0] = ((((thisX-xj)**2+(thisY-yj)**2))**0.5) #* px_to_m 
-        jAngle = w.heading
-        jAngle = jAngle - thisAngle
-        jHeading  = math.atan2(math.sin(jAngle), math.cos(jAngle))
         dx = xj - thisX
         dy = yj - thisY
+        
+        neighbours[index,ncount,0] = ((((dx)**2+(dy)**2))**0.5) #* px_to_m 
         angle = math.atan2(dy,dx)
         angle = angle - thisAngle
+
         neighbours[index,ncount,1] = math.atan2(math.sin(angle), math.cos(angle))
+        w_id = w['clip']*10000 + w['c_id']
         neighbours[index,ncount,2] = w_id
-        neighbours[index,ncount,3] = jHeading
+        jdx = w.dx
+        jdy = w.dy
+        jAngle = math.atan2(jdy,jdx) - thisAngle
+        neighbours[index,ncount,3] = jAngle
+        jMoveLength = ((jdx**2)+(jdy**2))**0.5
+        neighbours[index,ncount,4] = jMoveLength
+        
         ncount+=1
 
 # convert to a numpy array
@@ -137,4 +144,5 @@ evector[evector<-pi]=evector[evector<-pi]+2*pi
 evector[evector>pi]=evector[evector>pi]-2*pi
 np.save('pdata/evector.npy', evector)
     
+
 
