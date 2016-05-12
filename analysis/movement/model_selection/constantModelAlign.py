@@ -30,28 +30,27 @@ beta = 0.135#Uniform('beta',lower=0, upper=1,value=0.136)
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
 evector = np.load('../pdata/evector.npy')
+
     
+# variable to normalize the move step lengths for the alignment rule
+dists = neighbours[:,:,4]
+stepLen=np.mean(dists[dists>0])
 @deterministic(plot=False)
 def social_vector(at_l=attract_length, at_a=attract_angle, al_w=align_weight, ig=ignore_length):
+
+    xj = (neighbours[:,:,0]*np.cos(neighbours[:,:,1]))+(np.cos(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
+    yj = (neighbours[:,:,0]*np.sin(neighbours[:,:,1]))+(np.sin(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
         
+    anglesj=np.arctan2(yj,xj)
+
     n_weights = np.ones_like(neighbours[:,:,0],dtype=np.float64)
-    #n_weights[neighbours[:,:,0]==0]=0.0
     n_weights[neighbours[:,:,0]<=ig]=0.0
     n_weights[neighbours[:,:,0]>at_l]=0.0
     n_weights[(neighbours[:,:,1]<-at_a)|(neighbours[:,:,1]>at_a)]=0.0
 
- #   na_weights = al_w*np.ones_like(neighbours[:,:,0],dtype=np.float64)
- #   na_weights[neighbours[:,:,0]==0]=0.0
- #   na_weights[neighbours[:,:,0]>al_l]=0.0
- #   na_weights[(neighbours[:,:,1]<-al_a)|(neighbours[:,:,1]>al_a)]=0.0
+    xsv = np.sum(np.cos(anglesj)*n_weights,1)
+    ysv = np.sum(np.sin(anglesj)*n_weights,1)
     
- #   xsv = np.sum(np.cos(neighbours[:,:,1])*n_weights,1) + np.sum(np.cos(neighbours[:,:,3])*na_weights,1)
- #   ysv = np.sum(np.sin(neighbours[:,:,1])*n_weights,1) + np.sum(np.sin(neighbours[:,:,3])*na_weights,1)
- #   al_w=0.2
-    xsv = np.sum((np.cos(neighbours[:,:,1])+np.cos(neighbours[:,:,3])*al_w*neighbours[:,:,4]) *n_weights,1)# + np.sum(np.cos(neighbours[:,:,3])*na_weights,1)
-    ysv = np.sum((np.sin(neighbours[:,:,1])+np.sin(neighbours[:,:,3])*al_w*neighbours[:,:,4]) *n_weights,1)#ysvAT + ysvAL*al_w#np.sum(np.sin(neighbours[:,:,1])*n_weights,1) + np.sum(np.sin(neighbours[:,:,3])*na_weights,1)
-    
-   
     out = np.empty((len(mvector),2))
 
     out[:,0] = xsv

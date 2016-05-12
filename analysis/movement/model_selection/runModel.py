@@ -1,101 +1,110 @@
-#tester
-
 
 from matplotlib import pylab as plt
 import numpy as np
 
+import corRandomWalk
+import environment
+import constantModel
 import constantModelAlign
+import decayModel
+import decayModelAlign
+import networkModelMC
+import networkModelAlignMC
+
+
 import pymc
 from pymc import MCMC
 from pymc.Matplot import plot as mcplot
+
+
+### random walk model
+#M = MCMC(corRandomWalk)
+#M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+#np.save('mc_data/crw_rho_m.npy',M.trace('rho_m')[:])
+#
+### environment model
+#M = MCMC(environment)
+#M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+#np.save('mc_data/env_rho_m.npy',M.trace('rho_m')[:])
+#np.save('mc_data/env_rho_e.npy',M.trace('rho_e')[:])
+#np.save('mc_data/env_beta.npy',M.trace('beta')[:])
+#
+### constant model
+#M = MCMC(constantModel)
+#M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+#np.save('mc_data/cm_rho_s.npy',M.trace('rho_s')[:])
+#np.save('mc_data/cm_alpha.npy',M.trace('alpha')[:])
+#
+#np.save('mc_data/cm_ia.npy',M.trace('interaction_angle')[:])
+#np.save('mc_data/cm_il.npy',M.trace('interaction_length')[:])
+#np.save('mc_data/cm_ig.npy',M.trace('ignore_length')[:])
+
+## constant model align
 M = MCMC(constantModelAlign)
+M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+np.save('mc_data/cma_rho_s.npy',M.trace('rho_s')[:])
+np.save('mc_data/cma_alpha.npy',M.trace('alpha')[:])
 
-#M.use_step_method(pymc.AdaptiveMetropolis, [M.left_angle, M.right_angle, M.lag, M.dist],  delay=1000)
-M.sample(iter=20000, burn=100, thin=10,verbose=0)
-mcplot(M)
-#from pylab import hist, show
+np.save('mc_data/cma_at_a.npy',M.trace('attract_angle')[:])
+np.save('mc_data/cma_at_l.npy',M.trace('attract_length')[:])
+np.save('mc_data/cma_aw.npy',M.trace('align_weight')[:])
+np.save('mc_data/cma_ig.npy',M.trace('ignore_length')[:])
 
-#
-#plt.hist(M.trace('reprho')[:])
-#plt.xlim(0,1)
+## decay model
+M = MCMC(decayModel)
+M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+#np.save('mc_data/dm_rho_m.npy',M.trace('rho_m')[:])
+#np.save('mc_data/dm_rho_e.npy',M.trace('rho_e')[:])
+np.save('mc_data/dm_rho_s.npy',M.trace('rho_s')[:])
+np.save('mc_data/dm_alpha.npy',M.trace('alpha')[:])
+#np.save('mc_data/dm_beta.npy',M.trace('beta')[:])
 
-#plt.title('repulsion strength')
+np.save('mc_data/dm_ia.npy',M.trace('interaction_angle')[:])
+np.save('mc_data/dm_il.npy',M.trace('interaction_length')[:])
+np.save('mc_data/dm_de.npy',M.trace('decay_exponent')[:])
+np.save('mc_data/dm_ig.npy',M.trace('ignore_length')[:])
 
-#plt.savefig('repulsion_strength.png')
-#plt.show()
-#plt.hist(M.trace('attrho')[:])
-#plt.xlim(0,1)
+## decay model align
+M = MCMC(decayModelAlign)
+M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+#np.save('mc_data/dma_rho_m.npy',M.trace('rho_m')[:])
+#np.save('mc_data/dma_rho_e.npy',M.trace('rho_e')[:])
+np.save('mc_data/dma_rho_s.npy',M.trace('rho_s')[:])
+np.save('mc_data/dma_alpha.npy',M.trace('alpha')[:])
+#np.save('mc_data/dma_beta.npy',M.trace('beta')[:])
 
-#plt.title('attraction strength')
+np.save('mc_data/dma_at_a.npy',M.trace('attract_angle')[:])
+np.save('mc_data/dma_at_l.npy',M.trace('attract_length')[:])
+#np.save('mc_data/dma_al_a.npy',M.trace('align_angle')[:])
+#np.save('mc_data/dma_al_l.npy',M.trace('align_length')[:])
+np.save('mc_data/dma_aw.npy',M.trace('align_weight')[:])
+np.save('mc_data/dma_at_e.npy',M.trace('attract_exponent')[:])
+np.save('mc_data/dma_ig.npy',M.trace('ignore_length')[:])
+#np.save('mc_data/dma_al_e.npy',M.trace('align_exponent')[:])
 
-#plt.savefig('attraction_strength.png')
-#plt.show()
-#plt.hist(M.trace('replen')[:])
-#plt.xlim(0,5)
-#plt.title('repulsion length')
+## network model
+M = MCMC(networkModelMC)
+M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+#np.save('mc_data/nm_rho_m.npy',M.trace('rho_m')[:])
+#np.save('mc_data/nm_rho_e.npy',M.trace('rho_e')[:])
+np.save('mc_data/nm_rho_s.npy',M.trace('rho_s')[:])
+np.save('mc_data/nm_alpha.npy',M.trace('alpha')[:])
+#np.save('mc_data/nm_beta.npy',M.trace('beta')[:])
 
+np.save('mc_data/nm_ia.npy',M.trace('interaction_angle')[:])
+np.save('mc_data/nm_il.npy',M.trace('interaction_length')[:])
+np.save('mc_data/nm_ig.npy',M.trace('ignore_length')[:])
 
+## network model with alignment
+M = MCMC(networkModelAlignMC)
+M.sample(iter=50000, burn=25000, thin=10,verbose=0)
+#np.save('mc_data/nma_rho_m.npy',M.trace('rho_m')[:])
+#np.save('mc_data/nma_rho_e.npy',M.trace('rho_e')[:])
+np.save('mc_data/nma_rho_s.npy',M.trace('rho_s')[:])
+np.save('mc_data/nma_alpha.npy',M.trace('alpha')[:])
+#np.save('mc_data/nma_beta.npy',M.trace('beta')[:])
 
-#plt.savefig('repulsion_length.png')
-#plt.show()
-#plt.hist(M.trace('eta')[:])
-#plt.xlim(0,1)
-
-#plt.title('autocorrelation')
-
-#plt.savefig('autocorrelation.png')
-#plt.show()
-
-#show()
-#aa = (M.trace('alpha')[:])
-#bb = (M.trace('beta')[:])
-#mv=(1-bb)*(1-aa)
-#sv=aa
-#ev=(bb)*(1-aa)
-#plt.hist(mv,normed=True, label='memory')
-#plt.hist(sv,normed=True, label='social')
-#plt.hist(ev,normed=True, label='environment')
-#
-#plt.legend(loc='upper center')
-#plt.xlim(0,1)
-#plt.show()
-#plt.savefig('heading_weights.png')
-#
-#
-#plt.hist((M.trace('rho_s')[:]),normed=True, label='s')
-#plt.hist((M.trace('rho_m')[:]),normed=True, label='m')
-#plt.hist((M.trace('rho_e')[:]),normed=True, label='environment')
-#
-#plt.xlim(0.7,1.0)
-#plt.legend(loc='upper center')
-#plt.show()
-#
-#
-#plt.hist((M.trace('beta')[:]),normed=True,label='beta')
-#
-#plt.xlim(0.9,0.94)
-#plt.legend(loc='upper center')
-#plt.show()
-#plt.savefig('rho.png')
-#
-#
-#mrho = 0.96
-#xx = np.linspace(-3.142,3.142,1000)
-#yy = (1.0/(2.0*math.pi))*(1.0-mrho**2)/(1.0+mrho**2-2*mrho*np.cos(xx))
-#plt.xlim(-3.142,3.142)
-#plt.ylim(0,4)
-#plt.plot(xx,yy,color='blue',linewidth=2)
-#plt.fill_between(xx, 0, yy, color='blue', alpha=.25)
-#
-np.save('rho_e.npy',M.trace('rho_e')[:])
-np.save('rho_m.npy',M.trace('rho_m')[:])
-np.save('rho_s.npy',M.trace('rho_s')[:])
-np.save('interaction_angle.npy',M.trace('interaction_angle')[:])
-#np.save('angle_decay.npy',M.trace('angle_decay')[:])
-np.save('beta.npy',M.trace('beta')[:])
-np.save('interaction_length.npy',M.trace('interaction_length')[:])
-#np.save('decay_exponent.npy',M.trace('decay_exponent')[:])
-np.save('alpha.npy',M.trace('alpha')[:])
-#
-#
-#
+np.save('mc_data/nma_ia.npy',M.trace('interaction_angle')[:])
+np.save('mc_data/nma_il.npy',M.trace('interaction_length')[:])
+np.save('mc_data/nma_aw.npy',M.trace('align_weight')[:])
+np.save('mc_data/nma_ig.npy',M.trace('ignore_length')[:])
