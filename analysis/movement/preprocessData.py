@@ -34,6 +34,7 @@ for indexF, rowF in df.iterrows():
     posDF = posDF[posDF['frame']%120==0]
     dt = 60 # 60 frames is 1 second
     posDF['move']=np.NaN
+    posDF['moveLength']=np.NaN
     posDF['env_heading']=np.NaN
     for index, row in posDF.iterrows():
         thisFrame =  row['frame']
@@ -68,14 +69,15 @@ for indexF, rowF in df.iterrows():
             posDF.ix[index,'dx']=dx
             posDF.ix[index,'dy']=dy
             posDF.ix[index,'move'] = math.atan2(dy,dx) -  thisTheta
+            posDF.ix[index,'moveLength'] = (dy**2+dx**2)**0.5
 
             
 
 
     allDF = allDF.append(posDF,ignore_index=True)
 
-    
-allDF = allDF[np.isfinite(allDF['move'])]
+
+
 allDF = allDF.reset_index(drop=True)
 dsize = len(allDF)
 maxN=0
@@ -92,6 +94,7 @@ neighbours = np.zeros((dsize,maxN,5)).astype(np.float32) # dist, angle
 px_to_m = 100*2.0*math.tan(math.radians(30))/1920.0
 
 for index, row in allDF.iterrows():
+    
     thisFrame =  row['frame']
     thisID = row['c_id']
     thisClip = row['clip']
@@ -124,25 +127,26 @@ for index, row in allDF.iterrows():
         ncount+=1
 
 # convert to a numpy array
-allData = allDF.values
-
+#allData = allDF.values
+#keep non nan moves, of more than 1m and less than 10m
+keepIndexes = (np.isfinite(allDF['move'].values))&(allDF['moveLength'].values>1)&(allDF['moveLength'].values<10)
 
 uid = allDF['clip'].values*10000 + allDF['c_id'].values 
 
-np.save('pdata/neighbours.npy', neighbours)
-np.save('pdata/uid.npy', uid)
+np.save('pdata/neighbours.npy', neighbours[keepIndexes])
+np.save('pdata/uid.npy', uid[keepIndexes])
 
 mvector = allDF['move'].values
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('pdata/mvector.npy', mvector)
+np.save('pdata/mvector.npy', mvector[keepIndexes])
 
 
 
 evector = allDF['env_heading'].values
 evector[evector<-pi]=evector[evector<-pi]+2*pi
 evector[evector>pi]=evector[evector>pi]-2*pi
-np.save('pdata/evector.npy', evector)
+np.save('pdata/evector.npy', evector[keepIndexes])
     
 
 
