@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import os
+import pandas as pd
 from math import pi
 import matplotlib
 import matplotlib.gridspec as gridspec
@@ -223,7 +224,7 @@ pax3.text(-0.2, 1.1, 'C', transform=pax3.transAxes, fontsize=24, va='top', ha='r
 
 ###################################################
 ###################################################
-################FINAL PLOTS########################
+################FOURTH PLOT########################
 ###################################################
 ###################################################
 
@@ -243,7 +244,7 @@ xs=0.6
 xp = np.linspace(-xs, xs, 1000)
 gpdf = norm.pdf(xp,np.mean(moves),sigma)
 pax4.plot(xp, gpdf,'-',linewidth=3,color="slategrey")
-pax4.fill_between(xp,np.zeros_like(xp), gpdf,alpha=0.4)#, fc='#AAAAFF')
+#pax4.fill_between(xp,np.zeros_like(xp), gpdf,alpha=0.4)#, fc='#AAAAFF')
 pax4.hist(moves,normed=True,range=[-xs,xs],bins=40,color="midnightblue")
 pax4.set_xlim(-xs,xs)
 
@@ -254,13 +255,72 @@ pax4.text(-0.2, 1.1, 'D', transform=pax4.transAxes, fontsize=24, va='top', ha='r
 pax4.set_xlabel('Turn angle',fontsize=16)
 pax4.set_ylabel('Probability density',fontsize=16)
 
+###################################################
+###################################################
+##################FIFTH PLOT#######################
+###################################################
+###################################################
 
 
-pax5.plot(np.arange(0,1,0.1),np.sin(np.arange(0,1,0.1)))
+#pax5.plot(np.arange(0,1,0.1),np.sin(np.arange(0,1,0.1)))
 pax5.text(-0.2, 1.1, 'E', transform=pax5.transAxes, fontsize=24, va='top', ha='right')
 
-pax5.set_xlabel('test',fontsize=20)
-pax5.set_ylabel('test',fontsize=20)
+pax5.set_xlabel('time (seconds)',fontsize=20)
+pax5.set_ylabel('correlation',fontsize=20)
+
+
+
+HD = os.getenv('HOME')
+DATADIR = HD + '/Dropbox/dolphin_union/2015_footage/Solo/'
+FILELIST = HD + '/workspace/dolphinUnion/tracking/solo/fileList.csv'
+OUTDIR =  HD + '/Dropbox/dolphin_union/2015_footage/Solo/processedTracks/'
+
+df = pd.read_csv(FILELIST)
+allDF = pd.DataFrame()
+for index, row in df.iterrows():
+    noext, ext = os.path.splitext(row.filename)   
+    posfilename = OUTDIR + '/TRACKS_' + str(index) + '_' + noext + '.csv'
+    posDF = pd.read_csv(posfilename) 
+    posDF['clip']=index
+    #posDF = posDF[posDF['frame']%120==0]
+    dt = 120 # 60 frames is 1 second
+    posDF['dtheta']=np.NaN
+    #for c_id, rows in posDF.groupby('c_id'):
+    #    
+    #    posDF.ix[posDF['c_id']==c_id,'heading']=posDF[posDF['c_id']==c_id]['heading']-posDF[posDF['c_id']==c_id]['heading'].iloc[0]
+
+    allDF = allDF.append(posDF,ignore_index=True)
+
+    
+#allDF = allDF[np.isfinite(allDF['dtheta'])]
+allDF = allDF.reset_index(drop=True)
+time = 101 # 1.67 seconds
+corrs = np.zeros(time)
+seconds = np.arange(0,(time)/10,0.1)
+
+for t in range(time):
+    s1=[]
+    s2=[]
+    for _, track in allDF.groupby(['c_id','clip']):
+        heads = track['heading'].values
+        #break
+        #heads = heads[:time]
+        lh = len(heads)
+        for i in range(lh-t):
+            s1.append(heads[i])
+            s2.append(heads[i+t])
+    corrs[t]=np.corrcoef(s1,s2)[1,0]        
+    #break    
+ #   result=np.correlate(heads,heads,mode='full')
+  #  result = result[result.size/2:]
+   # counts[:len(result)]=counts[:len(result)]+1
+    #corrs[:len(result)]=corrs[:len(result)]+result
+
+#plt.figure()
+#corrs=corrs/counts
+pax5.plot(seconds,corrs)
+pax5.set_ylim(0,1)
+pax5.set_xlim(0,6)
 
 
 plt.show()
