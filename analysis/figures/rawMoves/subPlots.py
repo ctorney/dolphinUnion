@@ -242,9 +242,9 @@ sigma = 1.0/(pdf1*math.sqrt(2*math.pi))
 xs=0.6
 xp = np.linspace(-xs, xs, 1000)
 gpdf = norm.pdf(xp,np.mean(moves),sigma)
-pax4.plot(xp, gpdf,'k-',linewidth=2)
+pax4.plot(xp, gpdf,'-',linewidth=3,color="slategrey")
 pax4.fill_between(xp,np.zeros_like(xp), gpdf,alpha=0.4)#, fc='#AAAAFF')
-pax4.hist(moves,normed=True,range=[-xs,xs],bins=40)
+pax4.hist(moves,normed=True,range=[-xs,xs],bins=40,color="midnightblue")
 pax4.set_xlim(-xs,xs)
 
 
