@@ -20,13 +20,11 @@ ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.0)
 interaction_length = DiscreteUniform('interaction_length', lower=0, upper=20)
 interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2)
 rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9524)
-#rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9236)
-#rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9554)
 alpha = Uniform('alpha',lower=0, upper=1,value=0.4)
-#beta = Uniform('beta',lower=0, upper=1,value=0.1569)
-rho_m = 0.921#Uniform('rho_m',lower=0, upper=1,value=0.9181)
-rho_e = 0.930#Uniform('rho_e',lower=0, upper=1,value=0.9178)
-beta = 0.135#Uniform('beta',lower=0, upper=1,value=0.136)
+
+rho_m = 0.937
+rho_e = 0.956
+beta = 0.126
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
@@ -72,9 +70,9 @@ def moves(social=rho_s, al=alpha,sv=social_vector, value=mvector):
     als = al*np.ones_like(svv)
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
     
-    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
-    wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-    wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+    wcs = (1/(2*pi)) * (1-(social*social))/(1+(social*social)-2*social*np.cos((svv-mvector).transpose()))
+    wce = (1/(2*pi)) * (1-(re*re))/(1+(re*re)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
+    wcm = (1/(2*pi)) * (1-(rm*rm))/(1+(rm*rm)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
     wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
     wcc = wcc[wcc>0]
     return np.sum(np.log(wcc))

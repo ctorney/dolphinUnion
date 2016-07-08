@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 __all__ = ['rho_m','mvector']
 
-rho_m = Uniform('rho_m',lower=0, upper=1,value=0.5)
+rho_m = Uniform('rho_m',lower=0, upper=1,value=0.932)
 mvector = np.load('../pdata/mvector.npy')
 
 @stochastic(observed=True)

@@ -17,9 +17,9 @@ __all__ = ['rho_m','rho_e','beta','mvector']
 
 
 
-rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9187)
-rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9524)
-beta = Uniform('beta',lower=0, upper=1,value=0.1342)
+rho_m = Uniform('rho_m',lower=0, upper=1,value=0.921)
+rho_e = Uniform('rho_e',lower=0, upper=1,value=0.93)
+beta = Uniform('beta',lower=0, upper=1,value=0.135)
 
 
 mvector = np.load('../pdata/mvector.npy')

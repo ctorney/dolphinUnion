@@ -13,35 +13,21 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['ignore_length','attract_exponent','attract_length','attract_angle','align_exponent','align_length','align_angle','align_weight','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['ignore_length','attract_exponent','attract_length','attract_angle','align_weight','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
-#attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=6.69)
-#align_length = Uniform('align_length', lower=0.5, upper=20.0,value=3.087)
-#attract_exponent = Uniform('attract_exponent', lower=0.5, upper=50.0,value=0.9171)
-#align_exponent = Uniform('align_exponent', lower=0.5, upper=50.0,value=1.0)
-#attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.21)
-#align_angle = Uniform('align_angle', lower=0, upper=pi,value=0.39)
-align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.565)
+align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.77)
 
-#rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9682)
-#rho_m = Uniform('rho_m',lower=0, upper=1,value=0.9185)
-#rho_e = Uniform('rho_e',lower=0, upper=1,value=0.9188)
-#alpha = Uniform('alpha',lower=0, upper=1,value=0.452)
-#beta = Uniform('beta',lower=0, upper=1,value=0.1300)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=0.250)
+attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=3.175)
+attract_exponent = Uniform('attract_exponent', lower=0.0, upper=5.0,value=2.36)
+attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.189)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.967)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.37)
 
-
-
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.0)
-attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=4.87379)
-attract_exponent = Uniform('attract_exponent', lower=0.0, upper=3.0,value=1.10164733)
-attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.187738555)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9681)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.2933)
-
-rho_m = 0.921#Uniform('rho_m',lower=0, upper=1,value=0.9181)
-rho_e = 0.930#Uniform('rho_e',lower=0, upper=1,value=0.9178)
-beta = 0.135#Uniform('beta',lower=0, upper=1,value=0.136)
+rho_m = 0.937
+rho_e = 0.956
+beta = 0.126
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
@@ -84,9 +70,10 @@ def moves(social=rho_s, al=alpha, sv=social_vector, value=mvector):
     als = al*np.ones_like(svv)
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
     
-    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
-    wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-    wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+    wcs = (1/(2*pi)) * (1-(social*social))/(1+(social*social)-2*social*np.cos((svv-mvector).transpose()))
+    wce = (1/(2*pi)) * (1-(re*re))/(1+(re*re)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
+    wcm = (1/(2*pi)) * (1-(rm*rm))/(1+(rm*rm)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+
     wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
     wcc = wcc[wcc>0]
     return np.sum(np.log(wcc))

@@ -16,16 +16,15 @@ import matplotlib.pyplot as plt
 __all__ = ['ignore_length','attact_length','align_length','align_weight','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.0)
-attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=14.2734)
-attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.2022)
-align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.0)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9628)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.3637)
-
-rho_m = 0.921#Uniform('rho_m',lower=0, upper=1,value=0.9181)
-rho_e = 0.930#Uniform('rho_e',lower=0, upper=1,value=0.9178)
-beta = 0.135#Uniform('beta',lower=0, upper=1,value=0.136)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=0.3744)
+attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=5.79)
+attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.217)
+align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.765)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9664)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.5314)
+rho_m = 0.937
+rho_e = 0.956
+beta = 0.126
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
@@ -70,9 +69,9 @@ def moves(social=rho_s, al=alpha, sv=social_vector, value=mvector):
     als = al*np.ones_like(svv)
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
     
-    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
-    wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-    wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
+    wcs = (1/(2*pi)) * (1-(social*social))/(1+(social*social)-2*social*np.cos((svv-mvector).transpose()))
+    wce = (1/(2*pi)) * (1-(re*re))/(1+(re*re)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
+    wcm = (1/(2*pi)) * (1-(rm*rm))/(1+(rm*rm)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
     wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
     wcc = wcc[wcc>0]
     return np.sum(np.log(wcc))

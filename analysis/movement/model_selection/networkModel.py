@@ -16,21 +16,22 @@ import matplotlib.pyplot as plt
 __all__ = ['netcount','ignore_length','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.0)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=0.72)
 interaction_length = Uniform('interaction_length', lower=0, upper=20)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9524)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.4)
-rho_m = 0.921#Uniform('rho_m',lower=0, upper=1,value=0.9181)
-rho_e = 0.930#Uniform('rho_e',lower=0, upper=1,value=0.9178)
-beta = 0.135#Uniform('beta',lower=0, upper=1,value=0.136)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.18)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.968)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.30)
+
+rho_m = 0.937
+rho_e = 0.956
+beta = 0.126
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
 evector = np.load('../pdata/evector.npy')
 
 
-netcount=0
+netcount=1
     
 @deterministic(plot=False)
 def social_vector(il=interaction_length, ia=interaction_angle, ig=ignore_length):
