@@ -41,7 +41,7 @@ stepLen=np.mean(dists[dists>0])
 inds = np.unique(uid)
 
 for i,thisID in enumerate(inds):
-    if len(uid[uid==thisID])<15:
+    if len(uid[uid==thisID])<30:
         neighbours = neighbours[uid!=thisID]
         mvector = mvector[uid!=thisID]
         evector = evector[uid!=thisID]
@@ -111,20 +111,23 @@ minSF = np.log(minswcc) - np.log(asocwcc)
 inds = np.unique(uid)
 means = np.zeros_like(inds)
 stddevs = np.zeros_like(inds)
+moveC = np.zeros_like(inds)
 newID = np.zeros_like(uid)
+
 
 for i,thisID in enumerate(inds):
     thisSocial=sf[uid==thisID]
     #newID[uid==thisID]=i
  #   if len(thisSocial)<2:
  #       continue
-    #print(len(thisSocial))
+    moveC[i] = (len(thisSocial[thisSocial!=0]))
     means[i]=np.mean(thisSocial[thisSocial!=0])
-    stddevs[i]=np.std(thisSocial)/sqrt(len(thisSocial))
+    stddevs[i]=np.std(thisSocial)#/sqrt(len(thisSocial))
 
 x=np.argsort(means)
 means = means[x]
 stddevs = stddevs[x]
+moveC=moveC[x]
 #stddevs=stddevs[means!=0]
 #means=means[means!=0]
 inds = inds[x]
@@ -148,7 +151,7 @@ plt.plot(means,'r')
 plt.plot(means+stddevs,'b')
 plt.plot(means-stddevs,'b')
 #plt.figure()
-plt.plot(iSORT,sfSORT,'.')
+#plt.plot(iSORT,sfSORT,'.')
 empties = np.zeros_like(inds)
 for i,thisID in enumerate(inds):
     if np.isnan(means[i]):
@@ -156,7 +159,7 @@ for i,thisID in enumerate(inds):
     thisSocial=sv[uid==thisID]
     empties[i]=len(thisSocial[(thisSocial[:,1]==0)&(thisSocial[:,0]==0)])#/len(thisSocial)
 empties = empties[np.isfinite(means)]
-plt.plot(empties,'.')
+#plt.plot(empties,'.')
 
 
 
@@ -167,4 +170,16 @@ plt.pcolormesh(counts,vmin=0.05,vmax=0.2,cmap='bone')#,lw=0.0,vmin=np.min(hista2
 
 
 
+nbin=29
+countMap = np.zeros((0,nbin))
+for thisID in range(int(np.max(iSORT))):
+    thisVals = sfSORT[iSORT==thisID]
+    [counts,_]=np.histogram(thisVals,bins=nbin,range=[-1,2])
+    counts = counts/np.sum(counts)
+    countMap = np.vstack((countMap,counts))
+
+[counts,_,_] = np.histogram2d(sfSORT,iSORT,bins=40)
+counts = counts/np.sum(counts,0)
+plt.figure()
+plt.pcolormesh(countMap.T,vmin=0,vmax=0.15,cmap='bone')#,lw=0.0,vmin=np.min(hista2),vmax=np.max(hista2),cmap='viridis')
 

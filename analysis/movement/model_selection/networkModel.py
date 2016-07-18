@@ -21,10 +21,8 @@ interaction_length = Uniform('interaction_length', lower=0, upper=20)
 interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.18)
 rho_s = Uniform('rho_s',lower=0, upper=1,value=0.968)
 alpha = Uniform('alpha',lower=0, upper=1,value=0.30)
+beta = Uniform('beta',lower=0, upper=1,value=0.433)
 
-rho_m = 0.937
-rho_e = 0.956
-beta = 0.126
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
@@ -58,18 +56,37 @@ def social_vector(il=interaction_length, ia=interaction_angle, ig=ignore_length)
     return out
 
 
-
 @stochastic(observed=True)
-def moves(social=rho_s, rm=rho_m,re=rho_e,al=alpha, be=beta, sv=social_vector, value=mvector):
+def moves(social=rho_s, al=alpha,be=beta,sv=social_vector, value=mvector):
     # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
     # and the assumed interaction function
     svv = np.arctan2(sv[:,1],sv[:,0])
     als = al*np.ones_like(svv)
     als[(sv[:,1]==0)&(sv[:,0]==0)]=0
+    xvals = als*np.cos(svv) + (1.0-als)*(be*np.cos(evector)+(1.0-be))
+    yvals = als*np.sin(svv) + (1.0-als)*(be*np.sin(evector))
+
+    allV = np.arctan2(yvals,xvals)
     
-    wcs = (1/(2*pi)) * (1-np.power(social,2))/(1+np.power(social,2)-2*social*np.cos((svv-mvector).transpose())) # weighted wrapped cauchy
-    wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-    wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-    wcc = als*wcs + (1.0-als)*(be*wce+(1.0-be)*wcm)
-    wcc = wcc[wcc>0]
-    return np.sum(np.log(wcc))
+    wcs = (1/(2*pi)) * (1-(social*social))/(1+(social*social)-2*social*np.cos((allV-mvector).transpose()))
+
+    wcs = wcs[wcs>0]
+    return np.sum(np.log(wcs))
+
+
+@stochastic(observed=True)
+def moves(social=rho_s, al=alpha,be=beta,sv=social_vector, value=mvector):
+    # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
+    # and the assumed interaction function
+    svv = np.arctan2(sv[:,1],sv[:,0])
+    als = al*np.ones_like(svv)
+    als[(sv[:,1]==0)&(sv[:,0]==0)]=0
+    xvals = als*np.cos(svv) + (1.0-als)*(be*np.cos(evector)+(1.0-be))
+    yvals = als*np.sin(svv) + (1.0-als)*(be*np.sin(evector))
+
+    allV = np.arctan2(yvals,xvals)
+    
+    wcs = (1/(2*pi)) * (1-(social*social))/(1+(social*social)-2*social*np.cos((allV-mvector).transpose()))
+
+    wcs = wcs[wcs>0]
+    return np.sum(np.log(wcs))

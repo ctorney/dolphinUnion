@@ -57,7 +57,7 @@ cbar.set_label('Neighbour density (x0.1)', rotation=90,fontsize='x-large',labelp
 plt.savefig("tmp.png",bbox_inches='tight',dpi=300)
 ax1 = pax1.figure.add_axes(pax1.get_position(), projection='polar',label='twin', frame_on=False,theta_direction=pax1.get_theta_direction(), theta_offset=pax1.get_theta_offset())
 ax1.yaxis.set_visible(False)
-ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '45°', '90°', '135°', 'back', '225°','270°', '315°'],frac=1.1)
+ax1.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '$\pi / 4$', '$\pi / 2$', '$3\pi / 4$', 'back', '$5\pi / 4$','$3\pi / 2$', '$7\pi / 4$'],frac=1.1)
 ##body length legend - draws the ticks and 
 axes=pax1            
 factor = 0.98
@@ -126,7 +126,8 @@ cbar.set_label('Circular variance', rotation=90,fontsize='x-large',labelpad=15)
 plt.savefig("tmp.png",bbox_inches='tight',dpi=300)
 ax2 = pax2.figure.add_axes(pax2.get_position(), projection='polar',label='twin', frame_on=False,theta_direction=pax2.get_theta_direction(), theta_offset=pax2.get_theta_offset())
 ax2.yaxis.set_visible(False)
-ax2.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '45°', '90°', '135°', 'back', '225°','270°', '315°'],frac=1.1)
+ax2.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '$\pi / 4$', '$\pi / 2$', '$3\pi / 4$', 'back', '$5\pi / 4$','$3\pi / 2$', '$7\pi / 4$'],frac=1.1)
+
 ##body length legend - draws the ticks and 
 axes=pax2            
 factor = 0.98
@@ -189,7 +190,8 @@ cbar.set_label('Relative heading', rotation=90,fontsize='x-large',labelpad=15)
 plt.savefig("tmp.png",bbox_inches='tight',dpi=300)
 ax2 = pax3.figure.add_axes(pax3.get_position(), projection='polar',label='twin', frame_on=False,theta_direction=pax3.get_theta_direction(), theta_offset=pax3.get_theta_offset())
 ax2.yaxis.set_visible(False)
-ax2.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '45°', '90°', '135°', 'back', '225°','270°', '315°'],frac=1.1)
+ax2.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '$\pi / 4$', '$\pi / 2$', '$3\pi / 4$', 'back', '$5\pi / 4$','$3\pi / 2$', '$7\pi / 4$'],frac=1.1)
+#ax2.set_thetagrids(angles=np.arange(0,360,45),labels=['front', '45°', '90°', '135°', 'back', '225°','270°', '315°'],frac=1.1)
 ##body length legend - draws the ticks and 
 axes=pax3            
 factor = 0.98
@@ -265,8 +267,8 @@ pax4.set_ylabel('Probability density',fontsize=16)
 #pax5.plot(np.arange(0,1,0.1),np.sin(np.arange(0,1,0.1)))
 pax5.text(-0.2, 1.1, 'E', transform=pax5.transAxes, fontsize=24, va='top', ha='right')
 
-pax5.set_xlabel('time (seconds)',fontsize=20)
-pax5.set_ylabel('correlation',fontsize=20)
+pax5.set_xlabel('time (seconds)',fontsize=16)
+pax5.set_ylabel('correlation',fontsize=16)
 
 
 
@@ -318,10 +320,10 @@ for t in range(time):
 
 #plt.figure()
 #corrs=corrs/counts
-pax5.plot(seconds,corrs)
-pax5.set_ylim(0,1)
+pax5.plot(seconds,corrs,color='midnightblue',linewidth=3)
+pax5.set_ylim(0.0,1)
 pax5.set_xlim(0,6)
 
 
-plt.show()
-plt.savefig("all.png",bbox_inches='tight',dpi=300)
+#plt.show()
+plt.savefig("all.tiff",bbox_inches='tight',dpi=300)

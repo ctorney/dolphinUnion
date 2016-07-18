@@ -18,7 +18,6 @@ __all__ = ['rho_m','rho_e','beta','mvector']
 
 
 rho_m = Uniform('rho_m',lower=0, upper=1,value=0.921)
-rho_e = Uniform('rho_e',lower=0, upper=1,value=0.93)
 beta = Uniform('beta',lower=0, upper=1,value=0.135)
 
 
@@ -31,13 +30,17 @@ mvector = mvector[np.isfinite(mvector)]
 
 
 @stochastic(observed=True)
-def moves(rm=rho_m, re=rho_e, be=beta, value=mvector):
+def moves(rm=rho_m, be=beta, value=mvector):
     
-    wce = (1/(2*pi)) * (1-np.power(re,2))/(1+np.power(re,2)-2*re*np.cos((evector-mvector).transpose())) # weighted wrapped cauchy
-    wcm = (1/(2*pi)) * (1-np.power(rm,2))/(1+np.power(rm,2)-2*rm*np.cos((-mvector).transpose())) # weighted wrapped cauchy
-    wcc = (be*wce+(1.0-be)*wcm)
-    wcc = wcc[wcc>0]
-    return np.sum(np.log(wcc))
+    xvals = (be*np.cos(evector)+(1.0-be))
+    yvals = (be*np.sin(evector))
+
+    allV = np.arctan2(yvals,xvals)
+    wce = (1/(2*pi)) * (1-(rm*rm))/(1+(rm*rm)-2*rm*np.cos((allV-mvector).transpose()))
+
+    wce = wce[wce>0]
+    return np.sum(np.log(wce))
+    
 
 
 
