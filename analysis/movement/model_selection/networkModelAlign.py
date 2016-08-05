@@ -13,16 +13,16 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['netcount','ignore_length','align_weight','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['netcount','ignore_length','align_weight','interaction_length','interaction_angle','rho_s','alpha','beta','mvector']
 
 
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=0.389)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.29)
 interaction_length = Uniform('interaction_length', lower=0, upper=20)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.187)
-align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.784)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.966)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.33)
-beta = Uniform('beta',lower=0, upper=1,value=0.433)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.284)
+align_weight = Uniform('align_weight', lower=0.0, upper=2.0,value=0.998)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9387)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.235)
+beta = Uniform('beta',lower=0, upper=1,value=0.144)
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
@@ -38,8 +38,10 @@ stepLen=np.mean(dists[dists>0])
 @deterministic(plot=False)
 def social_vector(il=interaction_length, ia=interaction_angle, al_w=align_weight,ig=ignore_length):
 
-    xj = (neighbours[:,:,0]*np.cos(neighbours[:,:,1]))+(np.cos(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
-    yj = (neighbours[:,:,0]*np.sin(neighbours[:,:,1]))+(np.sin(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
+#xj = (neighbours[:,:,0]*np.cos(neighbours[:,:,1]))+(np.cos(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
+#yj = (neighbours[:,:,0]*np.sin(neighbours[:,:,1]))+(np.sin(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
+    xj = (neighbours[:,:,0]*np.cos(neighbours[:,:,1]))+(np.cos(neighbours[:,:,3])*(al_w))#/stepLen)*neighbours[:,:,4])
+    yj = (neighbours[:,:,0]*np.sin(neighbours[:,:,1]))+(np.sin(neighbours[:,:,3])*(al_w))#/stepLen)*neighbours[:,:,4])
         
     anglesj=np.arctan2(yj,xj)
         

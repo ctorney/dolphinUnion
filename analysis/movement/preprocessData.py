@@ -47,23 +47,23 @@ for indexF, rowF in df.iterrows():
         nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+2*dt))<1e-6)&(posDF['c_id']==thisID)]
         if len(nextTime)==1:
             # calculate the average heading all the other caribou were taking at this point
-            excThis = posDF[posDF.c_id!=thisID]
-            xp = excThis['x'].values
-            yp = excThis['y'].values
-            xdirs = np.cos(excThis['heading'].values)
-            ydirs = np.sin(excThis['heading'].values)
-            # decay rate of 3 gives the maximum likelihood for the environment only model
-            kappa = 3.0**2
-            dists = (((xp - thisX)**2 + (yp - thisY)**2))
-            weights = np.exp(-dists/kappa)
-            if np.sum(weights)>0:
-                xav = np.sum(weights*xdirs)/np.sum(weights)
-                yav = np.sum(weights*ydirs)/np.sum(weights)
-                posDF.ix[index,'env_heading']  = math.atan2(yav,xav)-  thisTheta
-            else:
-                posDF.ix[index,'env_heading']  = 0.0
+#       excThis = posDF[posDF.c_id!=thisID]
+#            xp = excThis['x'].values
+#            yp = excThis['y'].values
+#            xdirs = np.cos(excThis['heading'].values)
+#            ydirs = np.sin(excThis['heading'].values)
+#            # decay rate of 3 gives the maximum likelihood for the environment only model
+#            kappa = 3.0**2
+#            dists = (((xp - thisX)**2 + (yp - thisY)**2))
+#            weights = np.exp(-dists/kappa)
+#            if np.sum(weights)>0:
+#                xav = np.sum(weights*xdirs)/np.sum(weights)
+#                yav = np.sum(weights*ydirs)/np.sum(weights)
+#                posDF.ix[index,'env_heading']  = math.atan2(yav,xav)-  thisTheta
+#            else:
+#                posDF.ix[index,'env_heading']  = 0.0
             
-            # 1 second move heading
+            # interval move heading
             dx = nextTime.iloc[0]['x'] - thisX
             dy = nextTime.iloc[0]['y'] - thisY
             posDF.ix[index,'dx']=dx
@@ -74,7 +74,46 @@ for indexF, rowF in df.iterrows():
             
 
 
+    for index, row in posDF.iterrows():
+        thisFrame =  row['frame']
+        thisID = row['c_id']
+        thisX = row['x']
+        thisY = row['y']
+        tdx = row['dx']
+        tdy = row['dy']
+            
+        thisTheta = row['heading']
+        # calculate the change in heading from this point to the next
+        nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+2*dt))<1e-6)&(posDF['c_id']==thisID)]
+#       prevTime = posDF[(np.abs(posDF['frame']-(thisFrame-2*dt))<1e-6)&(posDF['c_id']==thisID)]
+#       if len(prevTime)==1:
+#           pdx = prevTime.iloc[0]['dx'] 
+#           pdy = prevTime.iloc[0]['dy'] 
+#           posDF.ix[index,'heading'] = math.atan2(pdy,pdx) 
+#            thisTheta = math.atan2(pdy,pdx) 
+#posDF.ix[index,'move'] = math.atan2(tdy,tdx) -  thisTheta
+            
+        if len(nextTime)==1:
+            # calculate the average heading all the other caribou were taking at this point
+            excThis = posDF[posDF.c_id!=thisID]
+            xp = excThis['x'].values
+            yp = excThis['y'].values
+            xdirs =  excThis['dx'].values
+            ydirs =  excThis['dy'].values
+            # decay rate of 3 gives the maximum likelihood for the environment only model
+            kappa = 2.0**2
+            dists = (((xp - thisX)**2 + (yp - thisY)**2))
+            weights = np.exp(-dists/kappa)
+            if np.sum(weights)>0:
+                xav = np.sum(weights*xdirs)/np.sum(weights)
+                yav = np.sum(weights*ydirs)/np.sum(weights)
+                posDF.ix[index,'env_heading']  = math.atan2(yav,xav)-  thisTheta
+            else:
+                posDF.ix[index,'env_heading']  = 0.0
+            
     allDF = allDF.append(posDF,ignore_index=True)
+
+            
 
 
 
@@ -94,6 +133,7 @@ neighbours = np.zeros((dsize,maxN,5)).astype(np.float32) # dist, angle
 px_to_m = 100*2.0*math.tan(math.radians(30))/1920.0
 
 for index, row in allDF.iterrows():
+    print(index,len(allDF))
     
     thisFrame =  row['frame']
     thisID = row['c_id']
@@ -102,6 +142,7 @@ for index, row in allDF.iterrows():
     thisY = row['y']
     thisAngle = row['heading']
     window = allDF[(allDF.frame==thisFrame)&(allDF['clip']==thisClip)&(allDF['c_id']!=thisID)]
+    prevTime = allDF[(np.abs(allDF['frame']-(thisFrame-2*dt))<1e-6)&(allDF['clip']==thisClip)&(allDF['c_id']!=thisID)]
     ncount = 0
 
     for i2, w in window.iterrows():
@@ -119,7 +160,16 @@ for index, row in allDF.iterrows():
         neighbours[index,ncount,2] = w_id
         jdx = w.dx
         jdy = w.dy
-        jAngle = math.atan2(jdy,jdx) - thisAngle
+#nAngle = w.heading
+        nAngle = math.atan2(jdy,jdx) 
+        jPT = prevTime[prevTime.c_id==w['c_id']]
+        if len(jPT)==1:
+            jdx = jPT.dx
+            jdy = jPT.dy
+            nAngle = math.atan2(jdy,jdx) 
+
+        jAngle = nAngle - thisAngle
+#jAngle = w.heading - thisAngle
         neighbours[index,ncount,3] = jAngle
         jMoveLength = ((jdx**2)+(jdy**2))**0.5
         neighbours[index,ncount,4] = jMoveLength

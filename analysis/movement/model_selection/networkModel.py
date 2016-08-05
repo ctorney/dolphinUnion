@@ -13,15 +13,15 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['netcount','ignore_length','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['netcount','ignore_length','interaction_length','interaction_angle','rho_s','alpha','beta','mvector']
 
 
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=0.72)
-interaction_length = Uniform('interaction_length', lower=0, upper=20)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.18)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.968)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.30)
-beta = Uniform('beta',lower=0, upper=1,value=0.433)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.29)
+interaction_length = DiscreteUniform('interaction_length', lower=0, upper=20)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2815)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.939)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.218)
+beta = Uniform('beta',lower=0, upper=1,value=0.1512)
 
 
 neighbours = np.load('../pdata/neighbours.npy')
@@ -74,19 +74,3 @@ def moves(social=rho_s, al=alpha,be=beta,sv=social_vector, value=mvector):
     return np.sum(np.log(wcs))
 
 
-@stochastic(observed=True)
-def moves(social=rho_s, al=alpha,be=beta,sv=social_vector, value=mvector):
-    # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
-    # and the assumed interaction function
-    svv = np.arctan2(sv[:,1],sv[:,0])
-    als = al*np.ones_like(svv)
-    als[(sv[:,1]==0)&(sv[:,0]==0)]=0
-    xvals = als*np.cos(svv) + (1.0-als)*(be*np.cos(evector)+(1.0-be))
-    yvals = als*np.sin(svv) + (1.0-als)*(be*np.sin(evector))
-
-    allV = np.arctan2(yvals,xvals)
-    
-    wcs = (1/(2*pi)) * (1-(social*social))/(1+(social*social)-2*social*np.cos((allV-mvector).transpose()))
-
-    wcs = wcs[wcs>0]
-    return np.sum(np.log(wcs))

@@ -16,14 +16,15 @@ import matplotlib.pyplot as plt
 __all__ = ['ignore_length','attract_exponent','attract_length','attract_angle','align_weight','rho_s','rho_m','rho_e','alpha','beta','mvector']
 
 
-align_weight = Uniform('align_weight', lower=0.0, upper=5.0,value=0.77)
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=0.250)
-attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=3.175)
-attract_exponent = Uniform('attract_exponent', lower=0.0, upper=5.0,value=2.36)
-attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.189)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.967)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.37)
-beta = Uniform('beta',lower=0, upper=1,value=0.433)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.33)
+attract_length = Uniform('attract_length', lower=0.5, upper=20.0,value=5.00)
+attract_angle = Uniform('attract_angle', lower=0, upper=pi,value=0.276)
+align_weight = Uniform('align_weight', lower=0.0, upper=1.0,value=0.767)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.940)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.384)
+beta = Uniform('beta',lower=0, upper=1,value=0.129)
+
+attract_exponent = Uniform('attract_exponent', lower=1.0, upper=25.0,value=9.1)
 
 neighbours = np.load('../pdata/neighbours.npy')
 mvector = np.load('../pdata/mvector.npy')
@@ -38,11 +39,16 @@ def social_vector(at_l=attract_length, at_a=attract_angle, at_de=attract_exponen
     if at_l<0.5:
         at_l=0.5
 
-    xj = (neighbours[:,:,0]*np.cos(neighbours[:,:,1]))+(np.cos(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
-    yj = (neighbours[:,:,0]*np.sin(neighbours[:,:,1]))+(np.sin(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
+#xj = (neighbours[:,:,0]*np.cos(neighbours[:,:,1]))+(np.cos(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
+#    yj = (neighbours[:,:,0]*np.sin(neighbours[:,:,1]))+(np.sin(neighbours[:,:,3])*(al_w/stepLen)*neighbours[:,:,4])
+#xj = (1.0-al_w)*np.cos(neighbours[:,:,1])+(np.cos(neighbours[:,:,3])*al_w)
+#   yj = (1.0-al_w)*np.sin(neighbours[:,:,1])+(np.sin(neighbours[:,:,3])*al_w)
+    xj = (neighbours[:,:,0]*np.cos(neighbours[:,:,1]))+(np.cos(neighbours[:,:,3])*(al_w))#/stepLen)*neighbours[:,:,4])
+    yj = (neighbours[:,:,0]*np.sin(neighbours[:,:,1]))+(np.sin(neighbours[:,:,3])*(al_w))#/stepLen)*neighbours[:,:,4])
+        
         
     anglesj=np.arctan2(yj,xj)
-    n_weights = np.exp(-(neighbours[:,:,0]/at_l)**at_de)
+    n_weights = np.exp(-((neighbours[:,:,0]/at_l)**at_de))
     n_weights[neighbours[:,:,0]<=ig]=0.0
     n_weights[(neighbours[:,:,1]<-at_a)|(neighbours[:,:,1]>at_a)]=0.0
 

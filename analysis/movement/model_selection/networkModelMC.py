@@ -13,15 +13,15 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['ignore_length','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['ignore_length','interaction_length','interaction_angle','rho_s','alpha','beta','mvector']
 
 
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.0)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.3)
 interaction_length = DiscreteUniform('interaction_length', lower=0, upper=20)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.9524)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.4)
-beta = Uniform('beta',lower=0, upper=1,value=0.433)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.25)
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.939)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.357)
+beta = Uniform('beta',lower=0, upper=1,value=0.14)
 
 
 neighbours = np.load('../pdata/neighbours.npy')

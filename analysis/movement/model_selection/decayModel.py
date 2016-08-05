@@ -13,16 +13,17 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-__all__ = ['ignore_length','decay_exponent','interaction_length','interaction_angle','rho_s','rho_m','rho_e','alpha','beta','mvector']
+__all__ = ['ignore_length','decay_exponent','interaction_length','interaction_angle','rho_s','alpha','beta','mvector']
 
 
-ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.327)
-interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=8.385)
-decay_exponent = Uniform('decay_exponent', lower=1.0, upper=25.0,value=22.18)
-interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2515)
-rho_s = Uniform('rho_s',lower=0, upper=1,value=0.938)
-alpha = Uniform('alpha',lower=0, upper=1,value=0.381)
-beta = Uniform('beta',lower=0, upper=1,value=0.096)
+decay_exponent = Uniform('decay_exponent', lower=1.0, upper=25.0,value=19.31)
+ignore_length = Uniform('ignore_length', lower=0.0, upper=5.0,value=1.33)
+interaction_length = Uniform('interaction_length', lower=0.5, upper=20.0,value=7.97)
+interaction_angle = Uniform('interaction_angle', lower=0, upper=pi,value=0.2514)
+
+rho_s = Uniform('rho_s',lower=0, upper=1,value=0.939)
+alpha = Uniform('alpha',lower=0, upper=1,value=0.35)
+beta = Uniform('beta',lower=0, upper=1,value=0.142)
 
 
 neighbours = np.load('../pdata/neighbours.npy')
@@ -49,7 +50,7 @@ def social_vector(il=interaction_length, de=decay_exponent, ia=interaction_angle
 
 
 @stochastic(observed=True)
-def moves(social=rho_s,al=alpha,be=beta,sv=social_vector, value=mvector):
+def moves(social=rho_s, al=alpha, be=beta, sv=social_vector, value=mvector):
     # this is the main function that calculates the log probability of all the moves based on the parameters that are passed in
     # and the assumed interaction function
     svv = np.arctan2(sv[:,1],sv[:,0])
