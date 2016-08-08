@@ -7,9 +7,10 @@ import constantModelAlign
 import decayModelAlign
 import networkModelAlign
 
-cma = constantModelAlign.constantP()
-dma = decayModelAlign.decayP()
-nma = networkModelAlign.networkP()
+
+#cma = constantModelAlign.constantP()
+#dma = decayModelAlign.decayP()
+#nma = networkModelAlign.networkP()
 
 #plt.plot(cma,dma,'.')
 #plt.figure()
@@ -55,8 +56,8 @@ metrics2=metrics2[metrics2>=0]
 
 
 rmin=0
-rmax=7
-nbins=7
+rmax=8
+nbins=8
 bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(metrics1,like_diff1,   statistic='mean', bins=nbins, range=[rmin,rmax])
 
 
@@ -100,13 +101,14 @@ for i,db in enumerate(neighbours):
 
     
         
-    if len(rowLoc)>2:
+    if len(rowLoc)>1:
         fmin = np.min(rowLoc)#-np.min(rowLoc)
         #sndmin = np.partition(np.reshape(rowLoc,(len(rowLoc))),1)[1]
         i1 = np.argwhere(rowLoc==fmin)
         #i2 = np.argwhere(rowLoc==sndmin)
         
-        metrics1[i] = abs(i1-np.mean(rowAng[np.arange(len(rowAng))!=i1[0][0]]))#len(rowLoc)# np.max(abs(rowAng[i1]-rowAng))
+        #metrics1[i] = abs(i1-np.mean(rowAng[np.arange(len(rowAng))!=i1[0][0]]))#len(rowLoc)# np.max(abs(rowAng[i1]-rowAng))
+        metrics1[i] = abs(i1-np.mean(rowAng))
         
 
     
@@ -129,6 +131,9 @@ err/=np.sqrt(counts)
 
 
 plt.errorbar(bin_centres, bin_means, yerr=err, fmt='-o')
+
+plt.ylim([-0.2,0.2])
+plt.axhline(y=0, color='k')
 #plt.figure()
 
 
