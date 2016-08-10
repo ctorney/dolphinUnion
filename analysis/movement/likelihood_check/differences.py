@@ -3,21 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import *
 import scipy.stats
+from scipy.stats import binned_statistic_2d
+from scipy.ndimage.filters import gaussian_filter1d
 import constantModelAlign
 import decayModelAlign
 import networkModelAlign
+
 plt.close('all')
 
 cma = constantModelAlign.constantP()
 dma = decayModelAlign.decayP()
 nma = networkModelAlign.networkP()
-
-#plt.plot(cma,dma,'.')
-#plt.figure()
-#plt.hist(cma-dma,bins=100,range=[-0.1,0.1])
-
-np.mean(cma)
-np.mean(dma)
 
 
 
@@ -31,84 +27,107 @@ evector = np.load('../pdata/evector.npy')
 
 
 
-metrics1 = np.zeros_like(mvector)-1
-metrics2 = np.zeros_like(mvector)-1
+nn1 = np.zeros_like(mvector)-1
+nn2 = np.zeros_like(mvector)-1
+nndiff = np.zeros_like(mvector)-1
 
 for i,db in enumerate(neighbours):
     rowLoc = np.zeros((0,1)).astype(np.float32)
     for row in db:
-        if row[0]>0 and row[0]<10.0 and row[1]>-0.27642330874196225 and row[1]<0.27642330874196225:
+        if row[0]>1.3 and row[0]<50.0 and row[1]>-0.27642330874196225 and row[1]<0.27642330874196225:
             
             rowLoc = np.vstack((rowLoc,row[0]))
     if len(rowLoc):
-        metrics2[i]=np.min(rowLoc)#-np.min(rowLoc)
+        nn1[i]=np.min(rowLoc)#-np.min(rowLoc)
     if len(rowLoc)>1:
         sndmin = np.partition(np.reshape(rowLoc,(len(rowLoc))),1)[1]
-        metrics1[i]=sndmin-np.min(rowLoc)
-        
+        nn2[i]=sndmin#-np.min(rowLoc)
+        nndiff[i]=sndmin-np.min(rowLoc)
 
-    
-like_diff=dma-cma
-like_diff2=dma-nma
+
+# decay model versus constant model        
+dectocon=dma-cma
+# decay model versus network model
+dectonet=dma-nma
+
+
+                            
 
 rmin=1
-rmax=11
-nbins=10
+rmax=20
+nbins=19
+bs = (rmax-rmin)/nbins
+
+
 plt.figure()
 
-bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(metrics2,like_diff,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+# average
+bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(nn1,dectonet,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+# standard error
+err, bin_edges, binnumber = scipy.stats.binned_statistic(nn1,dectonet,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+counts, bin_edges, binnumber = scipy.stats.binned_statistic(nn1,dectonet,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+err/=np.sqrt(counts)
 
-err, bin_edges, binnumber = scipy.stats.binned_statistic(metrics2,like_diff,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
-counts, bin_edges, binnumber = scipy.stats.binned_statistic(metrics2,like_diff,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+
+bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
+bmsmooth = gaussian_filter1d(bin_means,sigma=2*bs,mode='nearest')
+#plt.errorbar(bin_centres, bmsmooth, yerr=err, fmt='-o',label='nma1')
+#plt.plot(bin_centres, bin_means, label='nma1')
+plt.plot(bin_centres, bmsmooth, label='nma1')
+
+bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(nn2,dectonet,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+
+err, bin_edges, binnumber = scipy.stats.binned_statistic(nn2,dectonet,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+counts, bin_edges, binnumber = scipy.stats.binned_statistic(nn2,dectonet,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
 bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
 err/=np.sqrt(counts)
 
 
-plt.errorbar(bin_centres, bin_means, yerr=err, fmt='-o',label='cma1')
-
-
-
-bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(metrics2,like_diff2,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
-
-err, bin_edges, binnumber = scipy.stats.binned_statistic(metrics2,like_diff2,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
-counts, bin_edges, binnumber = scipy.stats.binned_statistic(metrics2,like_diff2,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
 bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
-err/=np.sqrt(counts)
-
-
-plt.errorbar(bin_centres, bin_means, yerr=err, fmt='-o',label='nma1')
+bmsmooth = gaussian_filter1d(bin_means,sigma=2*bs,mode='nearest')
+#plt.errorbar(bin_centres, bmsmooth, yerr=err, fmt='-o',label='nma2')
+#plt.plot(bin_centres, bin_means, label='nma1')
+plt.plot(bin_centres, bmsmooth, label='nma2')
 
 #plt.ylim([-0.08,0.08])
 plt.axhline(y=0, color='k')
 plt.legend()
 plt.figure()
 
+rmin=1.3
+rmax=10
+nbins=20
 
-rmin=1
-rmax=6
-nbins=10
+bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(nn1,dectocon,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
 
-bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(metrics1,like_diff,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
-
-err, bin_edges, binnumber = scipy.stats.binned_statistic(metrics1,like_diff,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
-counts, bin_edges, binnumber = scipy.stats.binned_statistic(metrics1,like_diff,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+err, bin_edges, binnumber = scipy.stats.binned_statistic(nn1,dectocon,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+counts, bin_edges, binnumber = scipy.stats.binned_statistic(nn1,dectocon,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
 bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
 err/=np.sqrt(counts)
 
 
-plt.errorbar(bin_centres, bin_means, yerr=err, fmt='-o',label='cma2')
+bmsmooth = gaussian_filter1d(bin_means,sigma=1.5*bs,mode='nearest')
+plt.plot(bin_centres, bmsmooth, label='cma1')
+plt.plot(bin_centres, bin_means, label='cma1')
+
+#plt.errorbar(bin_centres, bin_means, yerr=err, fmt='-o',label='cma1')
 
 
 
-bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(metrics1,like_diff2,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
-
-err, bin_edges, binnumber = scipy.stats.binned_statistic(metrics1,like_diff2,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
-counts, bin_edges, binnumber = scipy.stats.binned_statistic(metrics1,like_diff2,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(nndiff,dectocon,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+err, bin_edges, binnumber = scipy.stats.binned_statistic(nndiff,dectocon,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
+counts, bin_edges, binnumber = scipy.stats.binned_statistic(nndiff,dectocon,   statistic='count', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
 bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
 err/=np.sqrt(counts)
 
 
-plt.errorbar(bin_centres, bin_means, yerr=err, fmt='-o',label='nma2')
+
+bmsmooth = gaussian_filter1d(bin_means,sigma=1.5*bs,mode='nearest')
+plt.plot(bin_centres, bmsmooth, label='cma2')
+plt.plot(bin_centres, bin_means, label='cma1')
+
+
+
 
 #plt.ylim([-0.08,0.08])
 plt.axhline(y=0, color='k')
