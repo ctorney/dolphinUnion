@@ -23,12 +23,13 @@ def decayP():
     social = 0.9396529725088002
     al = 0.3870379791643967
     be = 0.13673084835299582
-
+    ig = 1.3065421032118985
+    al_w = 0.7659181663834961
+    
     at_de = 9.272935648814755
     at_l = 4.994414655997313
     at_a=0.27642330874196225
-    ig = 1.3065421032118985
-    al_w = 0.7659181663834961
+
 
 # variable to normalize the move step lengths for the alignment rule
     dists = neighbours[:,:,4]
@@ -70,4 +71,4 @@ def decayP():
     
     wcs = (1/(2*pi)) * (1-(social*social))/(1+(social*social)-2*social*np.cos((allV-mvector).transpose()))
 
-    return (np.log(wcs))
+    return ((wcs))
