@@ -8,6 +8,7 @@ from scipy.ndimage.filters import gaussian_filter1d
 import constantModelAlign
 import decayModelAlign
 import networkModelAlign
+from scipy.interpolate import interp1d
 
 plt.close('all')
 
@@ -34,7 +35,7 @@ nndiff = np.zeros_like(mvector)-1
 for i,db in enumerate(neighbours):
     rowLoc = np.zeros((0,1)).astype(np.float32)
     for row in db:
-        if row[0]>1.3 and row[0]<50.0 and row[1]>-0.27642330874196225 and row[1]<0.27642330874196225:
+        if row[0]>1.0 and row[0]<50.0 and row[1]>-0.27642330874196225 and row[1]<0.27642330874196225:
             
             rowLoc = np.vstack((rowLoc,row[0]))
     if len(rowLoc):
@@ -70,10 +71,15 @@ err/=np.sqrt(counts)
 
 
 bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
-bmsmooth = gaussian_filter1d(bin_means,sigma=2*bs,mode='nearest')
-#plt.errorbar(bin_centres, bmsmooth, yerr=err, fmt='-o',label='nma1')
-#plt.plot(bin_centres, bin_means, label='nma1')
-plt.plot(bin_centres, bmsmooth, label='nma1')
+
+
+bmsmooth = gaussian_filter1d(bin_means,sigma=1.5*bs,mode='nearest')
+
+f2 = interp1d(bin_centres, bmsmooth, kind='cubic')
+
+newX = np.linspace(bin_centres[0], bin_centres[-1], num=51, endpoint=True)
+
+plt.plot(newX, f2(newX), label='nma1')
 
 bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(nn2,dectonet,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
 
@@ -84,17 +90,22 @@ err/=np.sqrt(counts)
 
 
 bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
-bmsmooth = gaussian_filter1d(bin_means,sigma=2*bs,mode='nearest')
-#plt.errorbar(bin_centres, bmsmooth, yerr=err, fmt='-o',label='nma2')
-#plt.plot(bin_centres, bin_means, label='nma1')
-plt.plot(bin_centres, bmsmooth, label='nma2')
+
+
+bmsmooth = gaussian_filter1d(bin_means,sigma=1.5*bs,mode='nearest')
+
+f2 = interp1d(bin_centres, bmsmooth, kind='cubic')
+
+newX = np.linspace(bin_centres[0], bin_centres[-1], num=51, endpoint=True)
+
+plt.plot(newX, f2(newX), label='nma2')
 
 #plt.ylim([-0.08,0.08])
 plt.axhline(y=0, color='k')
 plt.legend()
 plt.figure()
 
-rmin=1.3
+rmin=1.0
 rmax=10
 nbins=20
 
@@ -106,13 +117,22 @@ bin_centres = 0.5*(bin_edges[:-1]+bin_edges[1:])
 err/=np.sqrt(counts)
 
 
+
+
 bmsmooth = gaussian_filter1d(bin_means,sigma=1.5*bs,mode='nearest')
-plt.plot(bin_centres, bmsmooth, label='cma1')
-plt.plot(bin_centres, bin_means, label='cma1')
+
+f2 = interp1d(bin_centres, bmsmooth, kind='cubic')
+
+newX = np.linspace(bin_centres[0], bin_centres[-1], num=51, endpoint=True)
+
+plt.plot(newX, f2(newX), label='cma1')
+#plt.plot(bin_centres, bin_means, label='cma1')
 
 #plt.errorbar(bin_centres, bin_means, yerr=err, fmt='-o',label='cma1')
 
-
+rmin=0
+rmax=10
+nbins=20
 
 bin_means, bin_edges, binnumber = scipy.stats.binned_statistic(nndiff,dectocon,   statistic='mean', bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
 err, bin_edges, binnumber = scipy.stats.binned_statistic(nndiff,dectocon,   statistic=np.std, bins=nbins,range=[rmin,rmax])#, range=[0,0.1])
@@ -123,8 +143,13 @@ err/=np.sqrt(counts)
 
 
 bmsmooth = gaussian_filter1d(bin_means,sigma=1.5*bs,mode='nearest')
-plt.plot(bin_centres, bmsmooth, label='cma2')
-plt.plot(bin_centres, bin_means, label='cma1')
+
+f2 = interp1d(bin_centres, bmsmooth, kind='cubic')
+
+newX = np.linspace(bin_centres[0], bin_centres[-1], num=51, endpoint=True)
+
+plt.plot(newX, f2(newX), label='cma2')
+#plt.plot(bin_centres, bin_means, label='cma1')
 
 
 

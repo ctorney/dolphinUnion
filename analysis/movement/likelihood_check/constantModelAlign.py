@@ -35,7 +35,7 @@ def constantP():
 #    be = 0.13673084835299582
 #    ig = 1.3065421032118985
 #    al_w = 0.7659181663834961
-    at_a=0.27642330874196225
+ #   at_a=0.27642330874196225
 
 # variable to normalize the move step lengths for the alignment rule
     dists = neighbours[:,:,4]
