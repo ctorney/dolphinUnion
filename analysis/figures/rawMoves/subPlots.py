@@ -21,8 +21,8 @@ fig = plt.figure(figsize=(18, 12))
 pax1 = plt.subplot2grid((2,4), (0,0), colspan=2,projection="polar",frameon=False)
 pax2 = plt.subplot2grid((2,4), (0,2), colspan=2,projection="polar",frameon=False)
 pax3 = plt.subplot2grid((2,4), (1, 0), colspan=2,projection="polar",frameon=False)
-pax4 = plt.subplot2grid((2,4), (1, 2))
-pax5 = plt.subplot2grid((2,4), (1, 3))
+pax5 = plt.subplot2grid((2,4), (1, 2))
+pax4 = plt.subplot2grid((2,4), (1, 3))
 
 plt.tight_layout(pad=2.5, w_pad=3.0, h_pad=2.50)
 
@@ -244,6 +244,7 @@ sigma = 1.0/(pdf1*math.sqrt(2*math.pi))
 
 xs=0.6
 xp = np.linspace(-xs, xs, 1000)
+print(sigma)
 gpdf = norm.pdf(xp,np.mean(moves),sigma)
 pax4.plot(xp, gpdf,'-',linewidth=3,color="slategrey")
 #pax4.fill_between(xp,np.zeros_like(xp), gpdf,alpha=0.4)#, fc='#AAAAFF')
@@ -253,7 +254,7 @@ pax4.set_xlim(-xs,xs)
 
 #pax4.plot(np.arange(0,1,0.1),np.sin(np.arange(0,1,0.1)))
 #pax4.hist(moves,range=[0.1,0.1],bins=100)
-pax4.text(-0.2, 1.1, 'D', transform=pax4.transAxes, fontsize=24, va='top', ha='right')
+pax4.text(-0.2, 1.1, 'E', transform=pax4.transAxes, fontsize=24, va='top', ha='right')
 pax4.set_xlabel('Turn angle',fontsize=16)
 pax4.set_ylabel('Probability density',fontsize=16)
 
@@ -265,7 +266,7 @@ pax4.set_ylabel('Probability density',fontsize=16)
 
 
 #pax5.plot(np.arange(0,1,0.1),np.sin(np.arange(0,1,0.1)))
-pax5.text(-0.2, 1.1, 'E', transform=pax5.transAxes, fontsize=24, va='top', ha='right')
+pax5.text(-0.2, 1.1, 'D', transform=pax5.transAxes, fontsize=24, va='top', ha='right')
 
 pax5.set_xlabel('time (seconds)',fontsize=16)
 pax5.set_ylabel('correlation',fontsize=16)
@@ -327,3 +328,4 @@ pax5.set_xlim(0,6)
 
 #plt.show()
 plt.savefig("all.tiff",bbox_inches='tight',dpi=300)
+plt.savefig("all.png",bbox_inches='tight',dpi=300)
