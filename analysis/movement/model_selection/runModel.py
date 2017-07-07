@@ -18,8 +18,8 @@ from pymc.Matplot import plot as mcplot
 
 
 # random walk model
-#M = MCMC(corRandomWalk)
-#M.sample(iter=400000, burn=50000, thin=10,verbose=0)
+M = MCMC(corRandomWalk)
+M.sample(iter=4000, burn=50, thin=10,verbose=0)
 #np.save('mc_data/crw_rho_m.npy',M.trace('rho_m')[:])
 
 # environment model
@@ -94,14 +94,14 @@ from pymc.Matplot import plot as mcplot
 #np.save('mc_data/nm_ig.npy',M.trace('ignore_length')[:])
 
 # network model with alignment
-M = MCMC(networkModelAlignMC)
-M.use_step_method(pymc.AdaptiveMetropolis, [networkModelAlignMC.interaction_angle,networkModelAlignMC.interaction_length,networkModelAlignMC.align_weight,networkModelAlignMC.ignore_length], delay=1000)
-M.sample(iter=400000, burn=50000, thin=10,verbose=0)
-np.save('mc_data/nma_rho_s.npy',M.trace('rho_s')[:])
-np.save('mc_data/nma_alpha.npy',M.trace('alpha')[:])
-np.save('mc_data/nma_beta.npy',M.trace('beta')[:])
-
-np.save('mc_data/nma_ia.npy',M.trace('interaction_angle')[:])
-np.save('mc_data/nma_il.npy',M.trace('interaction_length')[:])
-np.save('mc_data/nma_aw.npy',M.trace('align_weight')[:])
-np.save('mc_data/nma_ig.npy',M.trace('ignore_length')[:])
+#M = MCMC(networkModelAlignMC)
+#M.use_step_method(pymc.AdaptiveMetropolis, [networkModelAlignMC.interaction_angle,networkModelAlignMC.interaction_length,networkModelAlignMC.align_weight,networkModelAlignMC.ignore_length], delay=1000)
+#M.sample(iter=400000, burn=50000, thin=10,verbose=0)
+#np.save('mc_data/nma_rho_s.npy',M.trace('rho_s')[:])
+#np.save('mc_data/nma_alpha.npy',M.trace('alpha')[:])
+#np.save('mc_data/nma_beta.npy',M.trace('beta')[:])
+#
+#np.save('mc_data/nma_ia.npy',M.trace('interaction_angle')[:])
+#np.save('mc_data/nma_il.npy',M.trace('interaction_length')[:])
+#np.save('mc_data/nma_aw.npy',M.trace('align_weight')[:])
+#np.save('mc_data/nma_ig.npy',M.trace('ignore_length')[:])
