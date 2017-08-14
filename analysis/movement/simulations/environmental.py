@@ -17,8 +17,11 @@ XDIM = 100
 N=50
 
 # set to random initial conditions on (0,1)x(0,1)
-xpos = np.random.uniform(5,15,N)
-ypos = np.random.uniform(10,90,N)
+
+xspace = 2
+xpos = np.arange(5,5+xspace*N,xspace)
+#xpos = np.random.uniform(5,15,N)
+ypos = np.random.uniform(48,52,N)
 
 # set to random inital headings
 heading = np.random.uniform(0,2*pi,N)
@@ -29,11 +32,11 @@ randvar = 0.1
 speed = 1
 
 # run for this many time steps
-TIMESTEPS = 3000
+TIMESTEPS = 7000
 
 mvp = 3 # mean reversion parameter
 mean_heading = 0;
-sig = 0.5 # noise
+sig =0.5 # noise
 dt = 1e-2 # time step
 #t = np.arange(0,dt*2,dt) #             % Time vector
 #x0 = 0;                 #% Set initial condition
@@ -104,15 +107,16 @@ for t in range(TIMESTEPS):
 
     
     if t>1000:
-#        plt.clf()
-#        plt.plot(xpos, ypos,'k.')
-#        xc = np.mean(xpos)
-#        plt.xlim([xc-5,xc+5])
-#        plt.ylim([45,55])
-#        plt.axes().set_aspect('equal')
-#        plt.draw()
-#        plt.pause(0.01)
-        # plot the positions of all individuals
+        if t%10==0:
+            plt.clf()
+            plt.plot(xpos, ypos,'k.')
+            xc = np.mean(xpos)
+            plt.xlim([20,40])
+            plt.ylim([45,55])
+            plt.axes().set_aspect('equal')
+            plt.draw()
+            plt.pause(0.01)
+            # plot the positions of all individuals
         newcpos = pd.DataFrame(np.column_stack((np.full(N,t,dtype='int64'),xpos,ypos,heading,np.arange(0,N))), columns= ['frame','x','y','heading','c_id'])  
         outTracks = outTracks.append(newcpos,ignore_index=True )
 
