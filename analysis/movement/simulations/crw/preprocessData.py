@@ -23,22 +23,28 @@ allDF = pd.DataFrame()
 dt = 20 # 20 frames is 1 second
 timestep = 2
 framediff = (dt*timestep)
-posfilename = 'data_sim.csv'
+posfilename = 'crw.csv'
 posDF = pd.read_csv(posfilename) 
-#posDF['clip']=0
+posDF['clip']=0
 posDF = posDF[posDF['frame']%framediff==0]
+posDF = posDF[posDF['x']>0.25]
+posDF = posDF[posDF['x']<1.75]
+posDF = posDF[posDF['y']>0.25]
+posDF = posDF[posDF['y']<1.75]
+
 posDF['move']=np.NaN
-posDF['moveLength']=np.NaN
+
+posDF['moveLength']=0
 posDF['env_heading']=np.NaN
 for index, row in posDF.iterrows():
     thisFrame =  row['frame']
     thisID = row['c_id']
     thisX = row['x']
     thisY = row['y']
-    thisClip = row['clip']
+        
     thisTheta = row['heading']
     # calculate the change in heading from this point to the next
-    nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+framediff))<1e-6)&(posDF['c_id']==thisID)&(posDF['clip']==thisClip)]
+    nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+framediff))<1e-6)&(posDF['c_id']==thisID)]
     if len(nextTime)==1:
         dx = nextTime.iloc[0]['x'] - thisX
         dy = nextTime.iloc[0]['y'] - thisY
@@ -51,21 +57,27 @@ for index, row in posDF.iterrows():
 
 
 for index, row in posDF.iterrows():
-    
     thisFrame =  row['frame']
     thisID = row['c_id']
     thisX = row['x']
     thisY = row['y']
     tdx = row['dx']
     tdy = row['dy']
-    thisClip = row['clip']
+        
     thisTheta = row['heading']
     # calculate the change in heading from this point to the next
-    nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+framediff))<1e-6)&(posDF['c_id']==thisID)&(posDF['clip']==thisClip)]
+    nextTime = posDF[(np.abs(posDF['frame']-(thisFrame+framediff))<1e-6)&(posDF['c_id']==thisID)]
+#       prevTime = posDF[(np.abs(posDF['frame']-(thisFrame-2*dt))<1e-6)&(posDF['c_id']==thisID)]
+#       if len(prevTime)==1:
+#           pdx = prevTime.iloc[0]['dx'] 
+#           pdy = prevTime.iloc[0]['dy'] 
+#           posDF.ix[index,'heading'] = math.atan2(pdy,pdx) 
+#            thisTheta = math.atan2(pdy,pdx) 
+#posDF.ix[index,'move'] = math.atan2(tdy,tdx) -  thisTheta
     
     if len(nextTime)==1:
         # calculate the average heading all the other caribou were taking at this point
-        excThis = posDF[(posDF['clip']==thisClip)&(posDF.c_id!=thisID)]
+        excThis = posDF[posDF.c_id!=thisID]
         xp = excThis['x'].values
         yp = excThis['y'].values
         xdirs =  excThis['dx'].values
@@ -75,16 +87,16 @@ for index, row in posDF.iterrows():
         yp = yp[np.isfinite(xdirs)]
         ydirs = ydirs[np.isfinite(xdirs)]
         xdirs = xdirs[np.isfinite(xdirs)]
-        
-        kappa = 0.01**2
+        # decay rate of 4 gives the maximum likelihood for the environment only model
+        kappa = 8.0**2
         dists = (((xp - thisX)**2 + (yp - thisY)**2))
         weights = np.exp(-dists/kappa)
-
         if np.sum(weights)>0:
             xav = np.sum(weights*xdirs)/np.sum(weights)
             yav = np.sum(weights*ydirs)/np.sum(weights)
-            posDF.ix[index,'env_heading']  = math.atan2(yav,xav) -  thisTheta
+            posDF.ix[index,'env_heading']  = math.atan2(yav,xav)-  thisTheta
         else:
+            print('hapa')
             posDF.ix[index,'env_heading']  = 0.0
         
 allDF = allDF.append(posDF,ignore_index=True)
@@ -109,6 +121,7 @@ neighbours = np.zeros((dsize,maxN,5)).astype(np.float32) # dist, angle
 px_to_m = 100*2.0*math.tan(math.radians(30))/1920.0
 
 for index, row in allDF.iterrows():
+    print(index,len(allDF))
     
     thisFrame =  row['frame']
     thisID = row['c_id']
@@ -121,6 +134,10 @@ for index, row in allDF.iterrows():
     ncount = 0
 
     for i2, w in window.iterrows():
+        if np.isnan(w.dx):
+            continue
+        if np.isnan(w.dy):
+            continue
         xj = w.x
         yj = w.y
         dx = xj - thisX
@@ -162,15 +179,18 @@ np.save('pdata/neighbours.npy', neighbours[keepIndexes])
 np.save('pdata/uid.npy', uid[keepIndexes])
 
 mvector = allDF['move'].values
+mvector = mvector[keepIndexes]
 mvector[mvector<-pi]=mvector[mvector<-pi]+2*pi
 mvector[mvector>pi]=mvector[mvector>pi]-2*pi
-np.save('pdata/mvector.npy', mvector[keepIndexes])
+np.save('pdata/mvector.npy', mvector)
 
 
 
 evector = allDF['env_heading'].values
+evector=evector[keepIndexes]
 evector[evector<-pi]=evector[evector<-pi]+2*pi
 evector[evector>pi]=evector[evector>pi]-2*pi
-np.save('pdata/evector.npy', evector[keepIndexes])
+np.save('pdata/evector.npy', evector)
     
+
 
