@@ -17,8 +17,8 @@ trackName = 'crw/crw.csv'
 N=100
 
 # set to random initial conditions on (0,1)x(0,1)
-xpos = np.random.uniform(0,1,N)
-ypos = np.random.uniform(0,1,N)
+xpos = np.random.uniform(-1,1,N)
+ypos = np.random.uniform(-1,1,N)
 
 # set to random inital headings
 heading = np.random.uniform(0,2*pi,N)
@@ -30,11 +30,11 @@ randvar = 0.1
 speed = 1
 
 # run for this many time steps
-TIMESTEPS = 2200
+TIMESTEPS = 2000
 
 mvp = 3 # mean reversion parameter
 mean_heading = 0;
-sig = 0.5 # noise
+sig = 1.5 # noise
 dt = 1e-2 # time step
 #t = np.arange(0,dt*2,dt) #             % Time vector
 #x0 = 0;                 #% Set initial condition
@@ -79,8 +79,13 @@ def getHeading(i):
 
 # simulate individual movement
 for t in range(TIMESTEPS):
-    print(t)
+    print(t, heading[0])
     
+
+    if t%500==0:    
+        # set to random initial conditions on (0,1)x(0,1)
+        xpos = np.random.uniform(-1,1,N)
+        ypos = np.random.uniform(-1,1,N)
 
     
     for i in range(N):
@@ -95,24 +100,24 @@ for t in range(TIMESTEPS):
     ypos = ypos + dt*speed*np.sin(heading)
     # boundary conditions are periodic
     # boundary conditions are periodic
-    xpos[xpos<0]=xpos[xpos<0]+2
-    xpos[xpos>2]=xpos[xpos>2]-2
-    ypos[ypos<0]=ypos[ypos<0]+2
-    ypos[ypos>2]=ypos[ypos>2]-2
+#    xpos[xpos<0]=xpos[xpos<0]+2
+#    xpos[xpos>2]=xpos[xpos>2]-2
+#    ypos[ypos<0]=ypos[ypos<0]+2
+#    ypos[ypos>2]=ypos[ypos>2]-2
     
     
     # plot the positions of all individuals
-    #plt.clf()
-    #plt.plot(xpos, ypos,'k.')
-    #plt.xlim([0,2])
-    #plt.ylim([0,2])
-    #plt.axes().set_aspect('equal')
-    #plt.draw()
-    #plt.pause(0.01)
+    plt.clf()
+    plt.plot(xpos, ypos,'k.')
+    plt.xlim([-20,20])
+    plt.ylim([-20,20])
+    plt.axes().set_aspect('equal')
+    plt.draw()
+    plt.pause(0.01)
     
-    if t>100:
-       newcpos = pd.DataFrame(np.column_stack((np.full(N,t,dtype='int64'),xpos,ypos,heading,np.arange(0,N))), columns= ['frame','x','y','heading','c_id'])  
-       outTracks = outTracks.append(newcpos,ignore_index=True )
+    
+    newcpos = pd.DataFrame(np.column_stack((np.full(N,t,dtype='int64'),xpos,ypos,heading,np.arange(0,N))), columns= ['frame','x','y','heading','c_id'])  
+    outTracks = outTracks.append(newcpos,ignore_index=True )
 
 
 outTracks.to_csv(trackName, index=False)    
